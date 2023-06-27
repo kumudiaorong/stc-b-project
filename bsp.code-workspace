@@ -29,7 +29,13 @@
             "TIMER.C": "cpp",
             "STDLIB.H": "cpp",
             "xiaodou.C": "cpp",
-            "ABSACC.H": "cpp"
+            "ABSACC.H": "cpp",
+            "ASSERT.H": "cpp",
+            "LIMITS.H": "cpp",
+            "SETJMP.H": "cpp",
+            "SROM.H": "cpp",
+            "STDIO.H": "cpp",
+            "STRING.H": "cpp"
         },
         "C_Cpp.default.configurationProvider": "cl.eide",
         "[yaml]": {

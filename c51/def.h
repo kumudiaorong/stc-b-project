@@ -4,11 +4,10 @@
 #define SFR(name, addr) sfr name = addr
 #define SBIT(name, addr, bit) sbit name = addr ^ bit
 #define INTERRUPT(name, addr) void name(void) interrupt addr
-
 typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
-typedef int int32_t;
+typedef unsigned int uint16_t;
+typedef unsigned long uint32_t;
+typedef long int32_t;
 
 SFR(P0, 0x80);
 SBIT(P0_0, 0x80, 0);

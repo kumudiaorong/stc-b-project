@@ -1,6 +1,6 @@
 #include "hall.h"
 
-#include "sys.h"
+#include "detail/sys.h"
 
 static void (*hall_callback_table[2])() = {0};
 static void hall_scan() reentrant {

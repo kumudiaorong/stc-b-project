@@ -15,12 +15,13 @@
 // // #include<mcs51/8052.h>
 // // #include<mcs51/compiler.h>
 #include "display.h"
+#include "hall.h"
 #include "key.h"
 #include "sys.h"
 #include "timer.h"
-#include"hall.h"
+
 // #include
-int i = 0;
+long i = 0;
 void addhandler() {
   ++i;
 }
@@ -28,7 +29,7 @@ void subhandler() {
   --i;
 }
 void main() {
-  sys_init();
+  sys_init(11059200);
   timer_init();
   display_init();
   key_init();
@@ -39,7 +40,7 @@ void main() {
   sys_callback(CONEVENT(KEY, CONKEY(KEY_PRESS, 1)), subhandler);
   sys_callback(CONEVENT(HALL, HALLGETCLOSE), addhandler);
   sys_callback(CONEVENT(HALL, HALLGETAWAY), subhandler);
-
+  sys_callback(CONEVENT(TIMER, TIMER1S), addhandler);
   while(1) {
     display_num(i);
     display_led(i);
