@@ -61,7 +61,7 @@ void main(void) {
   // sys_register(CONEVENT(KEY, KEY_PRESS, 2), addhandler);
   sys_register(CONEVENT(TIMER, 0, T10MS), update);
   sys_register(CONEVENT(TIMER, 0, T1S), ok);
-  // sys_register(CONEVENT(HALL, 0, HALLGETCLOSE), addhandler);
+  sys_register(CONEVENT(HALL, 0, HALLGETCLOSE), addhandler);
   // sys_register(CONEVENT(HALL, 0, HALLGETAWAY), addhandler);
   sys_exec(0);
 }

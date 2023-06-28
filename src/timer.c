@@ -25,63 +25,52 @@ static uint8_t timer_scan(void) REENTRANT {
   }
   return ret;
 }
-// static uint8_t t10ms=0, t100ms=0;
-// static uint16_t t1s=0;
-// static uint8_t timer_scan(void) REENTRANT {
-//   uint8_t ret = 0;
-//   ++t10ms;
-//   ++t100ms;
-//   ++t1s;
-//   if(timer_callback_table[0])
-//     ret |= 1;
-//   if(t10ms == 10){
-//     ret |= 2;
-//     t10ms = 0;
-//   }
-//   if(t100ms == 100){
-//     ret |= 4;
-//     t100ms = 0;
-//   }
-//   if(t1s == 1000){
-//     ret |= 8;
-//     t1s = 0;
-//   }
-//   return ret;
-// }
 static void timer_register(uint8_t event, sys_callback_t callback) REENTRANT {
   timer_callback_table[event] = callback;
 }
 static void timer_callback(uint8_t msg) REENTRANT {
-  //   if(msg & 0x1){
-  //     if(timer_callback_table[0]) {
-  //       timer_callback_table[0]();
+  // if(msg & 0x1){
+  //   if(timer_callback_table[0]) {
+  //     timer_callback_table[0]();
+  //   }
+  //   if (msg & 0x2) {
+  //     if(timer_callback_table[1]) {
+  //       timer_callback_table[1]();
   //     }
-  //     if (msg & 0x2) {
-  //       if(timer_callback_table[1]) {
-  //         timer_callback_table[1]();
+  //     if (msg & 0x4) {
+  //       if(timer_callback_table[2]) {
+  //         timer_callback_table[2]();
   //       }
-  //       if (msg & 0x4) {
-  //         if(timer_callback_table[2]) {
-  //           timer_callback_table[2]();
-  //         }
-  //         if (msg & 0x8) {
-  //           if(timer_callback_table[3]) {
-  //             timer_callback_table[3]();
-  //           }
+  //       if (msg & 0x8) {
+  //         if(timer_callback_table[3]) {
+  //           timer_callback_table[3]();
   //         }
   //       }
   //     }
   //   }
-  if(timer_callback_table[0] && (msg & 0x1)) {
+  // }
+  //   if(timer_callback_table[0] && (msg & 0x1)) {
+  //     timer_callback_table[0]();
+  //   }
+  //   if(timer_callback_table[1] && (msg & 0x2)) {
+  //     timer_callback_table[1]();
+  //   }
+  //   if(timer_callback_table[2] && (msg & 0x4)) {
+  //     timer_callback_table[2]();
+  //   }
+  //   if(timer_callback_table[3] && (msg & 0x8)) {
+  //     timer_callback_table[3]();
+  //   }
+  if((msg & 0x1)) {
     timer_callback_table[0]();
   }
-  if(timer_callback_table[1] && (msg & 0x2)) {
+  if((msg & 0x2)) {
     timer_callback_table[1]();
   }
-  if(timer_callback_table[2] && (msg & 0x4)) {
+  if((msg & 0x4)) {
     timer_callback_table[2]();
   }
-  if(timer_callback_table[3] && (msg & 0x8)) {
+  if((msg & 0x8)) {
     timer_callback_table[3]();
   }
 }

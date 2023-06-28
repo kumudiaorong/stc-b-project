@@ -1,8 +1,9 @@
 #include "hall.h"
 
 #include "detail/sys.h"
+#include "string.h"
 #include "sys.h"
-#include"string.h"
+
 static sys_callback_t hall_callback_table[2];
 
 static uint8_t hall_scan(void) REENTRANT {
@@ -10,7 +11,9 @@ static uint8_t hall_scan(void) REENTRANT {
   uint8_t ret = 0;
   if(hall_state != __HALL) {
     hall_state = __HALL;
-    ret |= (hall_state + 1);
+    if(hall_callback_table[hall_state]) {
+      ret |= (hall_state + 1);
+    }
   }
   return ret;
 }
@@ -18,9 +21,7 @@ static void hall_register(uint8_t event, sys_callback_t callback) REENTRANT {
   hall_callback_table[event] = callback;
 }
 static void hall_callback(uint8_t msg) REENTRANT {
-  if(hall_callback_table[msg-1]) {
-    hall_callback_table[msg-1]();
-  }
+  hall_callback_table[msg - 1]();
 }
 void hall_init(void) {
   P1M1 &= ~(1 << 2);
