@@ -7,7 +7,6 @@
 #define __KEY_CNT 3
 #define __KEY_PRESS(x) (x == 0)
 enum KeyEvent { KEY_PRESS, KEY_RELEASE };
-#define CONKEY(act, idx) ((act << 4) | idx)
 void key_init(void);
 uint8_t key_get(void);
 #endif

@@ -62,14 +62,14 @@
 #else
 #endif
 
-extern uint8_t display_num_decoding[16];
-extern uint8_t display_num_index[__SEG_CNT];
+extern XDATA uint8_t display_num_decoding[16];
+extern XDATA uint8_t display_num_index[__SEG_CNT];
 /**
  * @brief initialize led
  *
  * @param none
  */
-void display_init();
+void display_init(void);
 /**
  * @brief display a number on led
  *

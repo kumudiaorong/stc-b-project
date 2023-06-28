@@ -1,38 +1,91 @@
-#include "detail/sys.h"
 #include "timer.h"
-static uint32_t timer_count = 0;
-static void (*timer_callback_table[4])() = { 0 };
-static void timer_callback(uint8_t event, void (*callback)()) reentrant {
-  if (event < 4) {
-    timer_callback_table[event] = callback;
-  }
-}
-static void timer_call() {
-  // if (timer_count % 100 == 0 && timer_callbac) {
-  //   timer_callbac();
-  // }
-  int i = 0, j = 1;
-  for (; i < 4; ++i, j *= 10) {
-    if (timer_count % j == 0 && timer_callback_table[i]) {
-      // timer_callback_table[i]();
+
+#include "detail/sys.h"
+#include "string.h"
+
+static void (*timer_callback_table[4])(void);
+static uint8_t timer_scan(void) REENTRANT {
+  uint8_t ret = 0;
+  if(timer_callback_table[0])
+    ret |= 1;
+  if(sys_timer_cnt % 10 == 0) {
+    if(timer_callback_table[1]) {
+      ret |= 2;
+    }
+    if(sys_timer_cnt % 100 == 0) {
+      if(timer_callback_table[2]) {
+        ret |= 4;
+      }
+      if(sys_timer_cnt % 1000 == 0) {
+        if(timer_callback_table[3]) {
+          ret |= 8;
+        }
+      }
     }
   }
+  return ret;
 }
-INTERRUPT(timer, TF0_VECTOR) {
-  // timer_call();
-  int i = 0, j = 1;
-  for (; i < 4; ++i, j *= 10) {
-    if (timer_count % j == 0 && timer_callback_table[i]) {
-      timer_callback_table[i]();
-    }
+// static uint8_t t10ms=0, t100ms=0;
+// static uint16_t t1s=0;
+// static uint8_t timer_scan(void) REENTRANT {
+//   uint8_t ret = 0;
+//   ++t10ms;
+//   ++t100ms;
+//   ++t1s;
+//   if(timer_callback_table[0])
+//     ret |= 1;
+//   if(t10ms == 10){
+//     ret |= 2;
+//     t10ms = 0;
+//   }
+//   if(t100ms == 100){
+//     ret |= 4;
+//     t100ms = 0;
+//   }
+//   if(t1s == 1000){
+//     ret |= 8;
+//     t1s = 0;
+//   }
+//   return ret;
+// }
+static void timer_register(uint8_t event, sys_callback_t callback) REENTRANT {
+  timer_callback_table[event] = callback;
+}
+static void timer_callback(uint8_t msg) REENTRANT {
+  //   if(msg & 0x1){
+  //     if(timer_callback_table[0]) {
+  //       timer_callback_table[0]();
+  //     }
+  //     if (msg & 0x2) {
+  //       if(timer_callback_table[1]) {
+  //         timer_callback_table[1]();
+  //       }
+  //       if (msg & 0x4) {
+  //         if(timer_callback_table[2]) {
+  //           timer_callback_table[2]();
+  //         }
+  //         if (msg & 0x8) {
+  //           if(timer_callback_table[3]) {
+  //             timer_callback_table[3]();
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  if(timer_callback_table[0] && (msg & 0x1)) {
+    timer_callback_table[0]();
   }
-  ++timer_count;
+  if(timer_callback_table[1] && (msg & 0x2)) {
+    timer_callback_table[1]();
+  }
+  if(timer_callback_table[2] && (msg & 0x4)) {
+    timer_callback_table[2]();
+  }
+  if(timer_callback_table[3] && (msg & 0x8)) {
+    timer_callback_table[3]();
+  }
 }
-void timer_init() {
-  TMOD &= 0xf0;  // T0和T1都是工作在模式0下,即16位自动重装载模式
-  TH0 = (65535 - sysclk / 12 / 1000) >> 8;
-  TL0 = (65535 - sysclk / 12 / 1000) & 0xff;
-  ET0 = 1;  // T0中断允许
-  TR0 = 1;  // T0开始计时
-  sys.timer_callback = timer_callback;
+void timer_init(void) {
+  memset(timer_callback_table, 0, sizeof(timer_callback_table));
+  __sys_add_sensor(TIMER, timer_scan, timer_register, timer_callback);
 }

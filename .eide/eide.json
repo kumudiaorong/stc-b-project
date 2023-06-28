@@ -20,7 +20,7 @@
       "excludeList": [],
       "toolchain": "Keil_C51",
       "compileConfig": {
-        "options": ""
+        "options": "null"
       },
       "uploader": "Custom",
       "uploadConfig": {

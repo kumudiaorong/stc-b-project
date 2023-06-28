@@ -7,7 +7,7 @@
     },
     "c/cpp-compiler": {
         "optimization-type": "SPEED",
-        "optimization-level": "level-8"
+        "optimization-level": "level-9"
     },
     "asm-compiler": {},
     "linker": {

@@ -1,12 +1,27 @@
 // #include <mcs51/compiler.h>
 #ifndef __DEF_H__
 #define __DEF_H__
-#define SFR(name, addr) sfr name = addr
+
+#ifdef __C51__
 #define SBIT(name, addr, bit) sbit name = addr ^ bit
-#define INTERRUPT(name, addr) void name(void) interrupt addr
+#define SFR(name, addr) sfr name = addr
+#define INTERRUPT(name, vector) void name(void) interrupt vector
+#define XDATA xdata
+#define REENTRANT reentrant
+#elif defined(__SDCC) || defined(SDCC)
+#define SBIT(name, addr, bit) __sbit __at(addr + bit) name
+#define SFR(name, addr) __sfr __at(addr) name
+#define INTERRUPT(name, vector) void name(void) __interrupt(vector)
+#define XDATA __xdata
+#define REENTRANT __reentrant
+#endif
+// #define xdata __xdata
+// #define reentrant __reentrant
+// #include"mcs51/compiler.h"
+
 typedef unsigned char uint8_t;
-typedef unsigned int uint16_t;
-typedef unsigned long uint32_t;
+typedef unsigned short int uint16_t;
+typedef unsigned long int uint32_t;
 typedef long int32_t;
 
 SFR(P0, 0x80);
@@ -55,15 +70,15 @@ SFR(P3M0, 0xB2);
 SFR(P3M1, 0xB1);
 
 SFR(IE, 0xA8);
-SBIT(ET0, 0xA8, 1);
-SBIT(ET1, 0xA8, 3);
 SBIT(EA, 0xA8, 7);
+SBIT(ET1, 0xA8, 3);
+SBIT(ET0, 0xA8, 1);
 
 SFR(TMOD, 0x89);
 
 SFR(TCON, 0x88);
-SBIT(TR0, 0x88, 4);
 SBIT(TR1, 0x88, 6);
+SBIT(TR0, 0x88, 4);
 
 // sfr IP          =   0xB8;   //0000,0000 中断优先级寄存器
 // sbit PPCA       =   IP^7;
