@@ -1,22 +1,22 @@
 #include "timer.h"
-
+#include "def.h"
 #include "detail/sys.h"
 #include "string.h"
 
-static void (*timer_callback_table[4])(void);
-static uint8_t timer_scan(void) REENTRANT {
+static sys_callback_t timer_callback_table[4];
+static uint8_t timer_scan(void) REENTRANT{
   uint8_t ret = 0;
   if(timer_callback_table[0])
     ret |= 1;
-  if(sys_timer_cnt % 10 == 0) {
+  if(__sys_timer_cnt % 10 == 0) {
     if(timer_callback_table[1]) {
       ret |= 2;
     }
-    if(sys_timer_cnt % 100 == 0) {
+    if(__sys_timer_cnt % 100 == 0) {
       if(timer_callback_table[2]) {
         ret |= 4;
       }
-      if(sys_timer_cnt % 1000 == 0) {
+      if(__sys_timer_cnt % 1000 == 0) {
         if(timer_callback_table[3]) {
           ret |= 8;
         }
@@ -25,7 +25,7 @@ static uint8_t timer_scan(void) REENTRANT {
   }
   return ret;
 }
-static void timer_register(uint8_t event, sys_callback_t callback) REENTRANT {
+static void timer_register(uint8_t event, sys_callback_t callback) {
   timer_callback_table[event] = callback;
 }
 static void timer_callback(uint8_t msg) REENTRANT {

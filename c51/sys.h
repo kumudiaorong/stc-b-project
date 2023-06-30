@@ -3,7 +3,7 @@
 #include "def.h"
 typedef void (*sys_callback_t)(void);
 
-enum SysEvent { TIMER, KEY, HALL };
+enum SysEvent { TIMER, KEY, HALL, VIB };
 
 void sys_init(uint32_t sysclk);
 #define CONEVENT(sys, dri, msg) ((sys << 4) | (dri << 2) | msg)

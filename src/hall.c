@@ -6,7 +6,7 @@
 
 static sys_callback_t hall_callback_table[2];
 
-static uint8_t hall_scan(void) REENTRANT {
+static uint8_t hall_scan(void) {
   static uint8_t hall_state = __HALL_INI;
   uint8_t ret = 0;
   if(hall_state != __HALL) {
@@ -17,10 +17,10 @@ static uint8_t hall_scan(void) REENTRANT {
   }
   return ret;
 }
-static void hall_register(uint8_t event, sys_callback_t callback) REENTRANT {
-  hall_callback_table[event] = callback;
+static void hall_register(uint8_t event, sys_callback_t callback) {
+  hall_callback_table[event - 1] = callback;
 }
-static void hall_callback(uint8_t msg) REENTRANT {
+static void hall_callback(uint8_t msg) {
   hall_callback_table[msg - 1]();
 }
 void hall_init(void) {

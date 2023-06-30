@@ -46,12 +46,15 @@ SBIT(P1_7, 0x90, 7);
 
 SFR(P2, 0xA0);
 SBIT(P2_3, 0xA0, 3);
+SBIT(P2_4, 0xA0, 4);
 
 SFR(P3, 0xB0);
 SBIT(P3_0, 0xB0, 0);
 SBIT(P3_1, 0xB0, 1);
 SBIT(P3_2, 0xB0, 2);
 SBIT(P3_3, 0xB0, 3);
+SBIT(P3_4, 0xB0, 4);
+SBIT(P3_5, 0xB0, 5);
 
 SFR(TL0, 0x8A);
 SFR(TL1, 0x8B);
@@ -72,13 +75,17 @@ SFR(P3M1, 0xB1);
 SFR(IE, 0xA8);
 SBIT(EA, 0xA8, 7);
 SBIT(ET1, 0xA8, 3);
+SBIT(EX1, 0xA8, 2);
 SBIT(ET0, 0xA8, 1);
+SBIT(EX0, 0xA8, 0);
 
 SFR(TMOD, 0x89);
 
 SFR(TCON, 0x88);
 SBIT(TR1, 0x88, 6);
 SBIT(TR0, 0x88, 4);
+SBIT(IT1, 0x88, 2);
+SBIT(IT0, 0x88, 0);
 
 // sfr IP          =   0xB8;   //0000,0000 中断优先级寄存器
 // sbit PPCA       =   IP^7;

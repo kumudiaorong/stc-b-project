@@ -4,5 +4,5 @@
 #define __HALL P1_2
 #define __HALL_INI 1
 void hall_init(void);
-enum HallEvent { HALLGETCLOSE, HALLGETAWAY };
+enum HallEvent { HALLNONE = 0, HALLGETCLOSE = 1, HALLGETAWAY = 2 };
 #endif

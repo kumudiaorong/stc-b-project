@@ -70,6 +70,7 @@ extern XDATA uint8_t display_num_index[__SEG_CNT];
  * @param none
  */
 void display_init(void);
+void display_en(uint8_t en);
 /**
  * @brief display a number on led
  *
@@ -82,6 +83,8 @@ void display_led(uint8_t num);
  * @param num number to display
  */
 void display_seg(uint8_t seg[8]);
+void display_seg7(
+  uint8_t seg1, uint8_t seg2, uint8_t seg3, uint8_t seg4, uint8_t seg5, uint8_t seg6, uint8_t seg7, uint8_t seg8);
 enum __display_base {
   DISPLAY_BASE_BIN = 2,
   DISPLAY_BASE_OCT = 8,
@@ -101,9 +104,5 @@ void display_base(enum __display_base db);
  * @param base number base
  */
 void display_num(uint32_t num);
-/**
- * @brief display a number on led
- *
- * @param num number to display
- */
+
 #endif

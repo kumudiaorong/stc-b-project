@@ -2,6 +2,6 @@
 #define __TIMER_H__
 #include "def.h"
 #include "sys.h"
-enum TimerEvent { T1MS, T10MS, T100MS, T1S };
+enum TimerEvent { TIMER1MS, TIMER10MS, TIMER100MS, TIMER1S };
 void timer_init(void);
 #endif
