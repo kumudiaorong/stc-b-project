@@ -10,14 +10,14 @@ static uint8_t key_states;
 static uint8_t key_state[__KEY_CNT] = {0};
 
 #ifdef __KEY_USE_INTERRUPT
-#define __KEY_BY_INT(idx, vec)                                                  \
-  INTERRUPT(__key##idx, vec) {                                                  \
-    static uint32_t last = 0;                                                   \
+#define __KEY_BY_INT(idx, vec)                                                    \
+  INTERRUPT(__key##idx, vec) {                                                    \
+    static uint32_t last = 0;                                                     \
     if(!last || __sys_timer_cnt - last > 20) {                                    \
-      if(key_callback_table[idx][(key_states >> idx) & 1])                      \
-       __sys.sensor[KEY].msg |= ((((key_states >> idx) & 1) + 1) << (idx << 1)); \
-      key_states ^= 1;                                                          \
-    }                                                                           \
+      if(key_callback_table[idx][(key_states >> idx) & 1])                        \
+        __sys.sensor[KEY].msg |= ((((key_states >> idx) & 1) + 1) << (idx << 1)); \
+      key_states ^= 1;                                                            \
+    }                                                                             \
     last = __sys_timer_cnt;                                                       \
   }
 __KEY_BY_INT(0, IE0_VECTOR)
@@ -64,17 +64,7 @@ static uint8_t key_scan(void) {
 }
 #endif
 void key_init(void) {
-#ifdef __KEY_USE_INTERRUPT
-  IE |= 0x5;
-  // EX1 = 1;
-  // EX0 = 1;
-  TCON &= ~0x5;
-  // IT1 = 0;
-  // IT0 = 0;
-  IP |= 0x5;
-  // PX1 = 1;
-  // PX0 = 1;
-#endif
+  __KEY_INIT();
   memset(key_callback_table, 0, sizeof(key_callback_table));
   __sys_add_sensor(KEY,
 #ifdef __KEY_USE_INTERRUPT

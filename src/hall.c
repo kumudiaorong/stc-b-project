@@ -24,8 +24,7 @@ static void hall_callback(uint8_t msg) {
   hall_callback_table[msg - 1]();
 }
 void hall_init(void) {
-  P1M1 &= ~(1 << 2);
-  P1M0 |= 1 << 2;
+  __HALL_INIT();
   memset(hall_callback_table, 0, sizeof(hall_callback_table));
   __sys_add_sensor(HALL, hall_scan, hall_register, hall_callback);
 }

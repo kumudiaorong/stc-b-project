@@ -6,6 +6,8 @@
 #define SEG_SEL_CONTINUOUS
 #define LED_CONTINUOUS
 
+#define __DISPLAY_INIT() __DO_WHILE(P0M0 = 0xff; P0M1 = 0x00; P2M0 |=(1<<3); P2M1 &= ~(1<<3))
+
 #define __LED_0 P0_0
 #define __LED_1 P0_1
 #define __LED_2 P0_2
@@ -15,17 +17,12 @@
 #define __LED_6 P0_6
 #define __LED_7 P0_7
 
-#define __LED_EN() \
-  do {             \
-    P2_3 = 1;      \
-  } while(0)
-#define __LED_DIS() \
-  do {              \
-    P2_3 = 0;       \
-  } while(0)
+#define __LED_EN() __DO_WHILE(P2_3 = 1)
+#define __LED_DIS() __DO_WHILE(P2_3 = 0)
 
 #ifdef LED_CONTINUOUS
 #define __LED P0
+#define __LED_SET(val) __DO_WHILE(P0 = (val))
 #else
 #endif
 
@@ -43,22 +40,16 @@
 #define __SEG_SEL_1 P2_1
 #define __SEG_SEL_2 P2_2
 
-#define __SEG_EN() \
-  do {             \
-    P2_3 = 0;      \
-  } while(0)
-#define __SEG_DIS() \
-  do {              \
-    P2_3 = 1;       \
-  } while(0)
+#define __SEG_EN() __DO_WHILE(P2_3 = 0)
+#define __SEG_DIS() __DO_WHILE(P2_3 = 1)
 
 #ifdef SEG_CONTINUOUS
-#define __SEG P0
+#define __SEG_SET(seg) __DO_WHILE(P0 = (seg))
 #else
 #endif
 
 #ifdef SEG_SEL_CONTINUOUS
-#define __SEG_SEL P2
+#define __SEG_SEL_SET(sel) __DO_WHILE(P2 = P2 & 0xf8 | (sel))
 #else
 #endif
 

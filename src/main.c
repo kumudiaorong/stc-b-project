@@ -74,7 +74,7 @@ sys_register(CONEVENT(KEY, KEYRELEASE, 1), addhandler);
 // sys_register(CONEVENT(KEY, KEY_PRESS, 2), addhandler);
 sys_register(CONEVENT(TIMER, 0, TIMER10MS), update);
 sys_register(CONEVENT(TIMER, 0, TIMER1S), ok);
-// sys_register(CONEVENT(HALL, 0, HALLGETCLOSE), addhandler);
+sys_register(CONEVENT(HALL, 0, HALLGETCLOSE), addhandler);
 // sys_register(CONEVENT(HALL, 0, HALLGETAWAY), addhandler);
 // sys_register(CONEVENT(VIB, 0, VIBSTART), addhandler);
 #elif TEST == 1

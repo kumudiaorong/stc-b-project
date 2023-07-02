@@ -4,13 +4,13 @@
 #include "string.h"
 void __sys_add_sensor(
   uint8_t event, __sys_func_scan scan, __sys_func_register _register, __sys_func_callback callback) REENTRANT {
- __sys.sensor[event].scan = scan;
- __sys.sensor[event]._register = _register;
- __sys.sensor[event].callback = callback;
- __sys.sensor[event].msg = 0;
+  __sys.sensor[event].scan = scan;
+  __sys.sensor[event]._register = _register;
+  __sys.sensor[event].callback = callback;
+  __sys.sensor[event].msg = 0;
 }
 void sys_register(uint8_t event, sys_callback_t callback) {
- __sys.sensor[(event >> 4)]._register(event & 0xf, callback);
+  __sys.sensor[(event >> 4)]._register(event & 0xf, callback);
 }
 uint32_t __sysclk = 0;
 XDATA __sys_t __sys;
@@ -36,26 +36,26 @@ INTERRUPT(sys_timer, TF0_VECTOR) {
   uint8_t i = 0;
   for(; i < SENSOR_CNT; ++i) {
     if(__sys.sensor[i].scan && !__sys.sensor[i].msg) {
-     __sys.sensor[i].msg |=__sys.sensor[i].scan();
+      __sys.sensor[i].msg |= __sys.sensor[i].scan();
     }
   }
   ++__sys_timer_cnt;
 }
 void sys_exec(sys_callback_t callback) {
   AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
-  TCON = 0x10;
+  TCON |= 0x10;
   // TR1 = 0;  // T1
   // TR0 = 1;  // T0开始计时
   while(1) {
     uint8_t i = 0;
     for(; i < SENSOR_CNT; ++i) {
-      if(__sys.sensor[i].callback &&__sys.sensor[i].msg) {
-       __sys.sensor[i].callback(__sys.sensor[i].msg);
-       __sys.sensor[i].msg = 0;
+      if(__sys.sensor[i].callback && __sys.sensor[i].msg) {
+        __sys.sensor[i].callback(__sys.sensor[i].msg);
+        __sys.sensor[i].msg = 0;
       }
     }
     if(__sys.display_schedule) {
-     __sys.display_schedule();
+      __sys.display_schedule();
     }
     if(callback) {
       callback();

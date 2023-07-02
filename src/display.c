@@ -17,23 +17,20 @@ static void display_schedule(void) {
   uint8_t i = 0;
   __SEG_EN();
   for(; i < __SEG_CNT; ++i) {
-    __SEG = 0;
-    __SEG_SEL = __SEG_SEL & 0xF8 | display_num_index[i];
+    __SEG_SET(0);
+    __SEG_SEL_SET(display_num_index[i]);
     if(__display_en & (1 << i))
-      __SEG = __display_seg[i];
+      __SEG_SET(__display_seg[i]);
     delay();
   }
-  __LED = 0;
+  __LED_SET(0);
   __LED_EN();
-  __LED = __display_led;
+  __LED_SET(__display_led);
   delay();
 }
 void display_init(void) {
-  P0M0 = 0xff;
-  P0M1 = 0x00;
-  P2M0 |= 0x08;
-  P2M1 &= ~0x08;
- __sys.display_schedule = display_schedule;
+  __DISPLAY_INIT();
+  __sys.display_schedule = display_schedule;
 }
 void display_en(uint8_t en) {
   __display_en = en;
@@ -41,13 +38,6 @@ void display_en(uint8_t en) {
 #ifdef LED_CONTINUOUS
 void display_led(uint8_t num) {
   __display_led = num;
-}
-#else
-#endif
-
-#ifdef SEG_SEL_CONTINUOUS
-void __display_sel(uint8_t pos) {
-  __SEG_SEL = __SEG_SEL & 0xF8 | (pos & 0x07);
 }
 #else
 #endif

@@ -15,6 +15,11 @@
 #define XDATA __xdata
 #define REENTRANT __reentrant
 #endif
+
+#define __DO_WHILE(x) \
+  do {                \
+    x;                \
+  } while(0)
 // #define xdata __xdata
 // #define reentrant __reentrant
 // #include"mcs51/compiler.h"
@@ -86,16 +91,6 @@ SBIT(TR1, 0x88, 6);
 SBIT(TR0, 0x88, 4);
 SBIT(IT1, 0x88, 2);
 SBIT(IT0, 0x88, 0);
-
-// sfr IP          =   0xB8;   //0000,0000 中断优先级寄存器
-// sbit PPCA       =   IP^7;
-// sbit PLVD       =   IP^6;
-// sbit PADC       =   IP^5;
-// sbit PS         =   IP^4;
-// sbit PT1        =   IP^3;
-// sbit PX1        =   IP^2;
-// sbit PT0        =   IP^1;
-// sbit PX0        =   IP^0;
 
 SFR(IP, 0xB8);
 SBIT(PPCA, 0xB8, 7);
