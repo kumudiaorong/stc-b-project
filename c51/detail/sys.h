@@ -29,6 +29,6 @@ typedef struct {
   __sys_func_schedule display_schedule;
 } __sys_t;
 void __sys_add_sensor(
-  uint8_t event, __sys_func_scan scan, __sys_func_register _register, __sys_func_callback callback) REENTRANT;
+  uint8_t event, __sys_func_scan scan, __sys_func_register _register, __sys_func_callback callback) ;
 extern XDATA __sys_t __sys;
 #endif

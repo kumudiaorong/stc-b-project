@@ -3,7 +3,7 @@
 #include "detail/sys.h"
 #include "string.h"
 void __sys_add_sensor(
-  uint8_t event, __sys_func_scan scan, __sys_func_register _register, __sys_func_callback callback) REENTRANT {
+  uint8_t event, __sys_func_scan scan, __sys_func_register _register, __sys_func_callback callback) {
   __sys.sensor[event].scan = scan;
   __sys.sensor[event]._register = _register;
   __sys.sensor[event].callback = callback;
