@@ -27,7 +27,7 @@
  *  =PX1 = 1;
  *  =PX0 = 1;
  */
-#define __KEY_INIT() __DO_WHILE(IE |= 0x5; TCON &= ~0x5; IP |= 0x5)
+#define __KEY_INIT() __DO_WHILE0(IE |= 0x5; TCON &= ~0x5; IP |= 0x5)
 #endif
 #ifdef __KEY_USE_POLLING
 #define __KEY_INIT() 

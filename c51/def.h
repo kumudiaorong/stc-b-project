@@ -3,20 +3,31 @@
 #define __DEF_H__
 
 #ifdef __C51__
+#define XDATA xdata
+#define CODE code
+#define REENTRANT reentrant
+
 #define SBIT(name, addr, bit) sbit name = addr ^ bit
 #define SFR(name, addr) sfr name = addr
 #define INTERRUPT(name, vector) void name(void) interrupt vector
-#define XDATA xdata
-#define REENTRANT reentrant
+#define INTERRUPT_USING(name, vector, regnum) void name(void) interrupt vector using regnum
+
+extern void _nop_(void);
+#define NOP() _nop_()
+
 #elif defined(__SDCC) || defined(SDCC)
+#define XDATA __xdata
+#define REENTRANT __reentrant
+
 #define SBIT(name, addr, bit) __sbit __at(addr + bit) name
 #define SFR(name, addr) __sfr __at(addr) name
 #define INTERRUPT(name, vector) void name(void) __interrupt(vector)
-#define XDATA __xdata
-#define REENTRANT __reentrant
+#define INTERRUPT_USING(name, vector, regnum) void name(void) __interrupt(vector) __using(regnum)
+
+#define NOP() __asm NOP __endasm
 #endif
 
-#define __DO_WHILE(x) \
+#define __DO_WHILE0(x) \
   do {                \
     x;                \
   } while(0)
@@ -25,7 +36,9 @@
 // #include"mcs51/compiler.h"
 
 typedef unsigned char uint8_t;
+typedef signed char int8_t;
 typedef unsigned short int uint16_t;
+typedef short int int16_t;
 typedef unsigned long int uint32_t;
 typedef long int32_t;
 
@@ -67,6 +80,10 @@ SFR(TH0, 0x8C);
 SFR(TH1, 0x8D);
 SFR(T2H, 0xD6);  // 0000,0000 T2高字节
 SFR(T2L, 0xD7);  // 0000,0000 T2低字节
+
+SFR(P1ASF, 0x9D);  // 0000,0000 端口1模拟功能配置寄存器
+
+SFR(CLK_DIV, 0x97);  // 0000,0000 时钟分频控制寄存器
 
 SFR(P0M0, 0x94);
 SFR(P0M1, 0x93);
