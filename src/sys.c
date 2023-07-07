@@ -2,25 +2,27 @@
 
 #include "detail/sys.h"
 #include "string.h"
-static uint8_t sys_schedule_idx = 0;//!< system schedule index
-void __sys_schedule_add(__sys_func_schedule schedule){
+
+static uint8_t sys_schedule_idx = 0;  //!< system schedule index
+void __sys_schedule_add(__sys_func_schedule schedule) {
   __sys.schedule[sys_schedule_idx++] = schedule;
 }
+static uint8_t sys_sensor_idx = 0;  //!< system sensor index
 /**
  * @fn __sys_sensor_add
  * @brief add sensor
- * @param event 
- * @param _register 
- * @param scan 
- * @param callback 
+ * @param event
+ * @param _register
+ * @param scan
+ * @param callback
  * @return none
  */
-void __sys_sensor_add(
-  uint8_t event,__sys_func_register _register, __sys_func_scan scan,  __sys_func_callback callback) {
-  __sys.sensor[event]._register = _register;
-  __sys.sensor[event].scan = scan;
-  __sys.sensor[event].callback = callback;
-  __sys.sensor[event].msg = 0;
+uint8_t __sys_sensor_add(__sys_func_register _register, __sys_func_scan scan, __sys_func_callback callback) {
+  __sys.sensor[sys_sensor_idx]._register = _register;
+  __sys.sensor[sys_sensor_idx].scan = scan;
+  __sys.sensor[sys_sensor_idx].callback = callback;
+  __sys.sensor[sys_sensor_idx].msg = 0;
+  return sys_sensor_idx++;
 }
 /**
  * @fn sys_register
@@ -32,14 +34,14 @@ void __sys_sensor_add(
 void sys_register(uint8_t event, sys_callback_t callback) {
   __sys.sensor[event >> 4]._register(event & 0xf, callback);
 }
-uint32_t __sysclk = 0;//!< system clock
-XDATA __sys_t __sys;//!< system
+uint32_t __sysclk = 0;  //!< system clock
+XDATA __sys_t __sys;    //!< system
 
-uint32_t __sys_timer_cnt = 0;//!< system timer count
+uint32_t __sys_timer_cnt = 0;  //!< system timer count
 /**
  * @fn sys_init
  * @brief system init
- * @param clk 
+ * @param clk
  * @return none
  */
 void sys_init(uint32_t clk) {
@@ -63,7 +65,7 @@ void sys_init(uint32_t clk) {
  */
 INTERRUPT(sys_timer, TF0_VECTOR) {
   uint8_t i = 0;
-  for(; i < SENSOR_CNT; ++i) {
+  for(; i < sys_sensor_idx; ++i) {
     if(__sys.sensor[i].scan && !__sys.sensor[i].msg) {
       __sys.sensor[i].msg |= __sys.sensor[i].scan();
     }
@@ -73,10 +75,11 @@ INTERRUPT(sys_timer, TF0_VECTOR) {
 /**
  * @fn sys_exec
  * @brief system exec
- * @param callback 
+ * @param callback
  * @return none
  */
-void sys_exec(sys_callback_t callback) {
+#include "display.h"
+void sys_exec(void (*callback)(void) REENTRANT) {
   IE |= 0x80;
   AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
   TCON |= 0x10;
@@ -95,6 +98,7 @@ void sys_exec(sys_callback_t callback) {
     }
     if(callback) {
       callback();
+      // display_num(__sys_timer_cnt);
     }
   }
 }

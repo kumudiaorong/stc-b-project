@@ -45,8 +45,6 @@ void sys_set(uint32_t msg) {
 uint8_t led = 1;
 void ok(void) {
   // ++i;
-  // adc_start(ADCRT);
-  // i = adc_wait();
   display_led(led);
   if(led == 0x80) {
     led = 1;
@@ -55,9 +53,9 @@ void ok(void) {
   }
 }
 #endif
-// void keyint(void) interrupt 0 {
-//   addhandler();
-// }
+void loop(void) {
+  // display_num(i);
+}
 
 void main(void) {
   sys_init(27000000);
@@ -72,21 +70,28 @@ void main(void) {
   display_en(0xff);
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
-  sys_register(CONEVENT(KEY, CONKEY(KEYPRESS, 0)), addhandler);
-  sys_register(CONEVENT(KEY, CONKEY(KEYRELEASE, 0)), addhandler);
-  sys_register(CONEVENT(KEY, CONKEY(KEYPRESS, 1)), addhandler);
-  sys_register(CONEVENT(KEY, CONKEY(KEYRELEASE, 1)), addhandler);
-  // sys_register(CONEVENT(KEY, KEY_PRESS, 1), addhandler);
-  // sys_register(CONEVENT(KEY, KEY_PRESS, 2), addhandler);
-  sys_register(CONEVENT(TIMER, TIMER10MS), update);
-  sys_register(CONEVENT(TIMER, TIMER1S), ok);
-  sys_register(CONEVENT(HALL, HALLGETCLOSE), addhandler);
-  sys_register(CONEVENT(NAV, CONNAV(NAVPRESS, NAVUP)), addhandler);
-  sys_register(CONEVENT(NAV, CONNAV(NAVRELEASE, NAVUP)), addhandler);
-  sys_register(CONEVENT(NAV, CONNAV(NAVPRESS, NAVDOWN)), addhandler);
-  // sys_register(CONEVENT)
-  // sys_register(CONEVENT(HALL, 0, HALLGETAWAY), addhandler);
-  sys_register(CONEVENT(VIB, VIBSTART), addhandler);
+  sys_register(CONEVENT(key_idx(), CONKEY(KEYPRESS, 0)), addhandler);
+  sys_register(CONEVENT(key_idx(), CONKEY(KEYRELEASE, 0)), addhandler);
+  sys_register(CONEVENT(key_idx(), CONKEY(KEYPRESS, 1)), addhandler);
+  sys_register(CONEVENT(key_idx(), CONKEY(KEYRELEASE, 1)), addhandler);
+  sys_register(CONEVENT(timer_idx(), TIMER10MS), update);
+  sys_register(CONEVENT(timer_idx(), TIMER1S), ok);
+  sys_register(CONEVENT(hall_idx(), HALLGETCLOSE), addhandler);
+  sys_register(CONEVENT(hall_idx(), HALLGETAWAY), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVPRESS, NAVUP)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVRELEASE, NAVUP)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVPRESS, NAVDOWN)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVRELEASE, NAVDOWN)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVPRESS, NAVLEFT)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVRELEASE, NAVLEFT)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVPRESS, NAVRIGHT)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVRELEASE, NAVRIGHT)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVPRESS, NAVCENTER)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVRELEASE, NAVCENTER)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVPRESS, NAVKEY3)), addhandler);
+  sys_register(CONEVENT(adc_idx(), CONNAV(NAVRELEASE, NAVKEY3)), addhandler);
+  sys_register(CONEVENT(vib_idx(), VIBSTART), addhandler);
+  sys_register(CONEVENT(vib_idx(), VIBSTOP), addhandler);
 #elif TEST == 1
   display_init();
   display_num_decoding[3] = 0x76;
@@ -104,5 +109,5 @@ void main(void) {
   display_seg7(0, display_num_decoding[1], display_num_decoding[2], 0x40, 0x38, 0x76, display_num_decoding[2],
     display_num_decoding[1]);
 #endif
-  sys_exec(0);
+  sys_exec(loop);
 }

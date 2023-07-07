@@ -3,12 +3,15 @@
 #include "detail/sys.h"
 #include "string.h"
 #include "sys.h"
-
-static XDATA sys_callback_t vib_callback_table[2];//!< vib callback table
-static XDATA uint8_t vib_state = 0;//!< vib state
-static void vib_register(uint8_t event, sys_callback_t callback);//!< vib register function
-static uint8_t vib_scan(void);//!< vib scan function
-static void vib_callback(uint8_t msg);//!< vib callback function
+static uint8_t __vib_idx = 0;
+static XDATA sys_callback_t vib_callback_table[2];                 //!< vib callback table
+static XDATA uint8_t vib_state = 0;                                //!< vib state
+static void vib_register(uint8_t event, sys_callback_t callback);  //!< vib register function
+static uint8_t vib_scan(void);                                     //!< vib scan function
+static void vib_callback(uint8_t msg);                             //!< vib callback function
+uint8_t vib_idx(void) {
+  return __vib_idx;
+}
 /**
  * @fn vib_init
  * @brief vib init
@@ -17,7 +20,7 @@ static void vib_callback(uint8_t msg);//!< vib callback function
 void vib_init(void) {
   __VIB_INIT();
   memset(vib_callback_table, 0, sizeof(vib_callback_table));
-  __sys_sensor_add(VIB,  vib_register,vib_scan, vib_callback);
+  __vib_idx = __sys_sensor_add(vib_register, vib_scan, vib_callback);
 }
 /**
  * @fn vib_register

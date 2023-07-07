@@ -18,7 +18,8 @@
   "targets": {
     "Release": {
       "excludeList": [
-        "src/add.c"
+        "src/add.c",
+        "src/beep.c"
       ],
       "toolchain": "Keil_C51",
       "compileConfig": {

@@ -5,4 +5,5 @@
 #define __VIB_INIT() __DO_WHILE0(P2M0 &= ~(1 << 4); P2M1 |= 1 << 4; P2_4 = 1)
 enum VibEvent { VIBNONE = 0, VIBSTART = 1, VIBSTOP = 2 };
 void vib_init(void);
+uint8_t vib_idx(void);
 #endif

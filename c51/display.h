@@ -94,6 +94,6 @@ void display_base(enum __display_base db);
  * @param num number to display
  * @param base number base
  */
-void display_num(uint32_t num);
+void display_num(uint32_t num)REENTRANT;
 
 #endif

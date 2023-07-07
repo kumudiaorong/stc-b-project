@@ -30,14 +30,14 @@ SFR(ADC_CONTR, 0xBC);  // 0000,0000 A/D×ª»»¿ØÖÆ¼Ä´æÆ÷
 SFR(ADC_RES, 0xBD);
 SFR(ADC_RESL, 0xBE);
 #ifdef __ADC_USE_INTERRUPT
-#define __ADC_INIT() __DO_WHILE0(EADC = 1;P1ASF = 0x98)
+#define __ADC_INIT() __DO_WHILE0(EADC = 1; P1ASF = 0x98)
 #else
 #define __ADC_INIT() __DO_WHILE0(P1ASF = 0x98)
 #endif
 #define __ADC_RT 0x3
 #define __ADC_ROP 0x4
 #define __ADC_NAV 0x7
-#define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0;ADC_CONTR = (0x88 | (channel)))
+#define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0; ADC_CONTR = (0x88 | (channel)))
 // #define __ADC_CLEAR() __DO_WHILE0(ADC_CONTR = ADC_CONTR & ~0x10; ADC_RES = 0; ADC_RESL = 0)
 #define __ADC_GET() ((ADC_RES << 2) + (ADC_RESL >> 6))
 #define __ADC_GET_HIGH() (ADC_RES)
@@ -67,4 +67,5 @@ typedef struct {
 } adc_t;
 extern XDATA adc_t adc;
 void adc_init(void);
+uint8_t adc_idx(void);
 #endif

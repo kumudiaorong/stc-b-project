@@ -91,7 +91,7 @@ void display_base(enum __display_base db) {
  * @param num 
  * @return none
  */
-void display_num(uint32_t num) {
+void display_num(uint32_t num)REENTRANT {
   uint8_t i = 0;
   for(; i < __SEG_CNT; i++) {
     __display_seg[i] = display_num_decoding[num % __db];

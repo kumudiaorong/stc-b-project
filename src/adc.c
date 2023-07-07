@@ -6,27 +6,29 @@
 #include "detail/sys.h"
 #include "sys.h"
 
-XDATA adc_t adc;//!< adc data
-static XDATA sys_callback_t nav_callback_table[6][2];
-static void nav_register(uint8_t event, sys_callback_t callback);//!< nav register function
-static uint8_t nav_scan(void) REENTRANT;//!< nav scan function
-static void nav_callback(uint8_t msg) REENTRANT;//!< nav callback function
-
+XDATA adc_t adc;  //!< adc data
+static XDATA sys_callback_t adc_callback_table[6][2];
+static void adc_register(uint8_t event, sys_callback_t callback);  //!< nav register function
+static uint8_t adc_scan(void) REENTRANT;                           //!< nav scan function
+static void adc_callback(uint8_t msg) REENTRANT;                   //!< nav callback function
+static uint8_t __adc_idx = 0;                                      //!< nav idx
+uint8_t adc_idx(void) {
+  return __adc_idx;
+}
 void adc_init(void) {
   __ADC_INIT();
   memset(&adc, 0, sizeof(adc_t));
-  memset(nav_callback_table, 0, sizeof(nav_callback_table));
-  __sys_sensor_add(NAV, nav_register, nav_scan, nav_callback);
+  memset(adc_callback_table, 0, sizeof(adc_callback_table));
+  __adc_idx = __sys_sensor_add(adc_register, adc_scan, adc_callback);
   __ADC_START(ADCRT);
 }
 
-
-static void nav_register(uint8_t event, sys_callback_t callback) {
-  nav_callback_table[event & 0x7][event >> 3] = callback;
+static void adc_register(uint8_t event, sys_callback_t callback) {
+  adc_callback_table[event & 0x7][event >> 3] = callback;
 }
-static XDATA uint8_t flag = 0;//!< adc flag, use bit 0-1 for idx in __adc, use bit 2 for response in nav_scan
+static XDATA uint8_t flag = 0;  //!< adc flag, use bit 0-1 for idx in __adc, use bit 2 for response in adc_scan
 
-static uint8_t nav_scan(void) REENTRANT {
+static uint8_t adc_scan(void) REENTRANT {
   static uint32_t lastT = 0;
   static uint8_t last = NAVNONE, start = NAVNONE;
   uint8_t cur, ret = 0;
@@ -40,10 +42,10 @@ static uint8_t nav_scan(void) REENTRANT {
   } else if(flag & 0x4) {
     if(__sys_timer_cnt - lastT > 10) {
       flag &= ~0x4;
-      if(start != NAVNONE && nav_callback_table[start][NAVPRESS]) {
+      if(start != NAVNONE && adc_callback_table[start][NAVPRESS]) {
         last = start;
         ret = start + 1;
-      } else if(start == NAVNONE && last != NAVNONE && nav_callback_table[last][NAVRELEASE]) {
+      } else if(start == NAVNONE && last != NAVNONE && adc_callback_table[last][NAVRELEASE]) {
         ret = (last + 1) << 3;
         last = NAVNONE;
       }
@@ -52,12 +54,12 @@ static uint8_t nav_scan(void) REENTRANT {
   return ret;
 }
 
-static void nav_callback(uint8_t msg) REENTRANT {
+static void adc_callback(uint8_t msg) REENTRANT {
   if(msg & 0x7) {
-    nav_callback_table[(msg & 0x7) - 1][0]();
+    adc_callback_table[(msg & 0x7) - 1][0]();
   }
   if(msg & 0x38) {
-    nav_callback_table[((msg & 0x38) >> 3) - 1][1]();
+    adc_callback_table[((msg & 0x38) >> 3) - 1][1]();
   }
 }
 static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 116, 113, 109, 107, 104, 101, 99, 97,
@@ -69,8 +71,8 @@ static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 
   12, 12, 12, 11, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 5, 5, 54, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, -1, -1,
   -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6, -7, -7, -8, -8, -9, -9, -10, -10, -11, -11, -12, -13, -13, -14, -14, -15,
   -16, -16, -17, -18, -19, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38,
-  -40};  //!< adc temperature table
-static uint8_t CODE __adc_channel[] = {ADCRT, ADCROP, ADCNAV};//!< adc channel table
+  -40};                                                         //!< adc temperature table
+static uint8_t CODE __adc_channel[] = {ADCRT, ADCROP, ADCNAV};  //!< adc channel table
 
 INTERRUPT_USING(__adc, ADC_VECTOR, ADC_INT_PRIORITY) {
   static XDATA uint32_t sum = 0;
