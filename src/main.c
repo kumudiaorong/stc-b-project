@@ -36,7 +36,7 @@ void addhandler(void) {
 void subhandler(void) {
   --i;
 }
-void sys_test(uint32_t msg) REENTRANT{
+void sys_test(uint32_t msg) REENTRANT {
   i += msg;
 }
 void sys_set(uint32_t msg) {
@@ -85,8 +85,8 @@ void main(void) {
   sys_register(CONEVENT(NAV, CONNAV(NAVRELEASE, NAVUP)), addhandler);
   sys_register(CONEVENT(NAV, CONNAV(NAVPRESS, NAVDOWN)), addhandler);
   // sys_register(CONEVENT)
-// sys_register(CONEVENT(HALL, 0, HALLGETAWAY), addhandler);
-// sys_register(CONEVENT(VIB, 0, VIBSTART), addhandler);
+  // sys_register(CONEVENT(HALL, 0, HALLGETAWAY), addhandler);
+  sys_register(CONEVENT(VIB, VIBSTART), addhandler);
 #elif TEST == 1
   display_init();
   display_num_decoding[3] = 0x76;

@@ -5,16 +5,13 @@
 #include "def.h"
 #include "detail/sys.h"
 #include "sys.h"
+
 XDATA adc_t adc;//!< adc data
-static XDATA sys_callback_t nav_callback_table[6][2];//!< nav callback table
+static XDATA sys_callback_t nav_callback_table[6][2];
 static void nav_register(uint8_t event, sys_callback_t callback);//!< nav register function
 static uint8_t nav_scan(void) REENTRANT;//!< nav scan function
 static void nav_callback(uint8_t msg) REENTRANT;//!< nav callback function
-/**
- * @fn adc_init
- * @brief adc init function
- * @return none
- */
+
 void adc_init(void) {
   __ADC_INIT();
   memset(&adc, 0, sizeof(adc_t));
@@ -22,22 +19,13 @@ void adc_init(void) {
   __sys_add_sensor(NAV, nav_register, nav_scan, nav_callback);
   __ADC_START(ADCRT);
 }
-/**
- * @fn nav_register
- * @brief nav register function
- * @param event event type
- * @param callback callback function
- * @return none
- */
-static void nav_register(uint8_t event,sys_callback_t callback) {
+
+
+static void nav_register(uint8_t event, sys_callback_t callback) {
   nav_callback_table[event & 0x7][event >> 3] = callback;
 }
 static XDATA uint8_t flag = 0;//!< adc flag, use bit 0-1 for idx in __adc, use bit 2 for response in nav_scan
-/**
- * @fn nav_scan
- * @brief nav scan function
- * @return msg bit 0-2 for press event, bit 3-5 for release event
- */
+
 static uint8_t nav_scan(void) REENTRANT {
   static uint32_t lastT = 0;
   static uint8_t last = NAVNONE, start = NAVNONE;
@@ -63,12 +51,7 @@ static uint8_t nav_scan(void) REENTRANT {
   }
   return ret;
 }
-/**
- * @fn nav_callback
- * @brief nav callback function
- * @param msg message
- * @return none
- */
+
 static void nav_callback(uint8_t msg) REENTRANT {
   if(msg & 0x7) {
     nav_callback_table[(msg & 0x7) - 1][0]();
@@ -88,11 +71,7 @@ static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 
   -16, -16, -17, -18, -19, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38,
   -40};  //!< adc temperature table
 static uint8_t CODE __adc_channel[] = {ADCRT, ADCROP, ADCNAV};//!< adc channel table
-/**
- * @fn __adc
- * @brief adc interrupt service routine
- * @return none
- */
+
 INTERRUPT_USING(__adc, ADC_VECTOR, ADC_INT_PRIORITY) {
   static XDATA uint32_t sum = 0;
   static XDATA uint16_t count = 0, avgCnt = 50;
