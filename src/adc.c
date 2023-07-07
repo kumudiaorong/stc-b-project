@@ -1,6 +1,5 @@
 #include "adc.h"
 
-#include <ABSACC.H>
 #include <string.h>
 
 #include "def.h"
@@ -62,7 +61,7 @@ static XDATA sys_callback_t nav_callback_table[6][2];
 static uint8_t nav_scan(void) REENTRANT {
   static uint32_t lastT = 0;
   static uint8_t last = NAVNONE, start = NAVNONE;
-  uint8_t cur;
+  uint8_t cur, ret = 0;
   __sys_lock();
   cur = adc.nav;
   __sys_unlock();
@@ -75,13 +74,14 @@ static uint8_t nav_scan(void) REENTRANT {
       flag &= ~0x4;
       if(start != NAVNONE && nav_callback_table[start][NAVPRESS]) {
         last = start;
-        return start + 1;
-      } else if(start == NAVNONE && nav_callback_table[last][NAVRELEASE]) {
-        return (last + 1) << 3;
+        ret = start + 1;
+      } else if(start == NAVNONE && last != NAVNONE && nav_callback_table[last][NAVRELEASE]) {
+        ret = (last + 1) << 3;
+        last = NAVNONE;
       }
     }
   }
-  return 0;
+  return ret;
 }
 static void nav_register(uint8_t event, void (*callback)(void)) {
   nav_callback_table[event & 0x7][event >> 3] = callback;
@@ -98,6 +98,6 @@ void adc_init(void) {
   __ADC_INIT();
   memset(&adc, 0, sizeof(adc_t));
   memset(nav_callback_table, 0, sizeof(nav_callback_table));
-  __sys_add_sensor(NAV,  nav_register,nav_scan, nav_callback);
+  __sys_add_sensor(NAV, nav_register, nav_scan, nav_callback);
   __ADC_START(ADCRT);
 }
