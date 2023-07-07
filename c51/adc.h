@@ -3,7 +3,7 @@
 #include "def.h"
 #define ADC_VECTOR 5
 #define ADC_INT_PRIORITY 1
-
+#define CONNAV(event, key) ((event << 3) | key)
 #define __ADC_USE_INTERRUPT  //
 
 #ifdef __ADC_USE_INTERRUPT
@@ -30,24 +30,41 @@ SFR(ADC_CONTR, 0xBC);  // 0000,0000 A/D×ª»»¿ØÖÆ¼Ä´æÆ÷
 SFR(ADC_RES, 0xBD);
 SFR(ADC_RESL, 0xBE);
 #ifdef __ADC_USE_INTERRUPT
-#define __ADC_INIT() __DO_WHILE0(EADC = 1; ADC_RES = 0; ADC_RESL = 0; P1ASF = 0x98; ADC_CONTR = 0xE0)
+#define __ADC_INIT() __DO_WHILE0(EADC = 1;P1ASF = 0x98)
 #else
-#define __ADC_INIT() __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0; P1ASF = 0x98; ADC_CONTR = 0xE0)
+#define __ADC_INIT() __DO_WHILE0(P1ASF = 0x98)
 #endif
 #define __ADC_RT 0x3
 #define __ADC_ROP 0x4
 #define __ADC_NAV 0x7
-#define __ADC_START(channel) __DO_WHILE0(ADC_CONTR |= (0x08 | (channel)))
-#define __ADC_CLEAR() __DO_WHILE0(ADC_CONTR &= ~0x10)
-#define __ADC_GET() ((ADC_RES << 2) | ADC_RESL)
+#define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0;ADC_CONTR = (0x88 | (channel)))
+// #define __ADC_CLEAR() __DO_WHILE0(ADC_CONTR = ADC_CONTR & ~0x10; ADC_RES = 0; ADC_RESL = 0)
+#define __ADC_GET() ((ADC_RES << 2) + (ADC_RESL >> 6))
 #define __ADC_GET_HIGH() (ADC_RES)
 enum AdcChannel {
   ADCRT = 0x3,
   ADCROP = 0x4,
   ADCNAV = 0x7,
 };
+enum NavEvent {
+  NAVPRESS,
+  NAVRELEASE,
+  NAVNONE = 7,
+};
+enum NavNum {
+  NAVKEY3,
+  NAVRIGHT,
+  NAVDOWN,
+  NAVCENTER,
+  NAVLEFT,
+  NAVUP,
+};
+
+typedef struct {
+  uint8_t rt;
+  uint8_t rop;
+  uint8_t nav;
+} adc_t;
+extern XDATA adc_t adc;
 void adc_init(void);
-void adc_start(enum AdcChannel cha);
-void adc_statistics(uint16_t sta);
-int16_t adc_wait(void);
 #endif

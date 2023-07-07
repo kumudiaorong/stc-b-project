@@ -3,14 +3,14 @@
 #include "detail/sys.h"
 #include "string.h"
 void __sys_add_sensor(
-  uint8_t event, __sys_func_scan scan, __sys_func_register _register, __sys_func_callback callback) {
-  __sys.sensor[event].scan = scan;
+  uint8_t event,__sys_func_register _register, __sys_func_scan scan,  __sys_func_callback callback) {
   __sys.sensor[event]._register = _register;
+  __sys.sensor[event].scan = scan;
   __sys.sensor[event].callback = callback;
   __sys.sensor[event].msg = 0;
 }
 void sys_register(uint8_t event, sys_callback_t callback) {
-  __sys.sensor[(event >> 4)]._register(event & 0xf, callback);
+  __sys.sensor[event >> 4]._register(event & 0xf, callback);
 }
 uint32_t __sysclk = 0;
 XDATA __sys_t __sys;
@@ -25,7 +25,7 @@ void sys_init(uint32_t clk) {
   TL0 = (65535 - __sysclk / 1000) & 0xff;
   // TH1 = (65535 - __sysclk / 12) >> 8;
   // TL1 = (65535 - __sysclk / 12) & 0xff;
-  IE |= 0x82;
+  IE |= 0x02;
   // EA = 1;
   // ET0 = 1;  // T0中断允许
   IP &= ~0x2;
@@ -42,6 +42,7 @@ INTERRUPT(sys_timer, TF0_VECTOR) {
   ++__sys_timer_cnt;
 }
 void sys_exec(sys_callback_t callback) {
+  IE |= 0x80;
   AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
   TCON |= 0x10;
   // TR1 = 0;  // T1

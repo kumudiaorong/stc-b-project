@@ -5,7 +5,7 @@
 #include "sys.h"
 
 static XDATA sys_callback_t vib_callback_table[2];
-static uint8_t vib_state = 0;
+static XDATA uint8_t vib_state = 0;
 static uint8_t vib_scan(void) {
   uint8_t ret = 0;
   if(GET_VIB()) {
@@ -30,5 +30,5 @@ static void vib_callback(uint8_t msg) {
 void vib_init(void) {
   __VIB_INIT();
   memset(vib_callback_table, 0, sizeof(vib_callback_table));
-  __sys_add_sensor(VIB, vib_scan, vib_register, vib_callback);
+  __sys_add_sensor(VIB,  vib_register,vib_scan, vib_callback);
 }

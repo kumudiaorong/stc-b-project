@@ -36,17 +36,17 @@ void addhandler(void) {
 void subhandler(void) {
   --i;
 }
-void sys_test(uint8_t msg) {
+void sys_test(uint32_t msg) REENTRANT{
   i += msg;
 }
-void sys_set(uint8_t msg) {
+void sys_set(uint32_t msg) {
   i = msg;
 }
 uint8_t led = 1;
 void ok(void) {
   // ++i;
-  adc_start(ADCRT);
-  i = adc_wait();
+  // adc_start(ADCRT);
+  // i = adc_wait();
   display_led(led);
   if(led == 0x80) {
     led = 1;
@@ -63,23 +63,28 @@ void main(void) {
   sys_init(27000000);
 #if TEST == 0
   adc_init();
+  // adc_statistics(200);
   key_init();
   timer_init();
   hall_init();
   vib_init();
   display_init();
-  display_en(0xBf);
+  display_en(0xff);
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
-  sys_register(CONEVENT(KEY, KEYPRESS, 0), addhandler);
-  sys_register(CONEVENT(KEY, KEYRELEASE, 0), addhandler);
-  sys_register(CONEVENT(KEY, KEYPRESS, 1), addhandler);
-  sys_register(CONEVENT(KEY, KEYRELEASE, 1), addhandler);
+  sys_register(CONEVENT(KEY, CONKEY(KEYPRESS, 0)), addhandler);
+  sys_register(CONEVENT(KEY, CONKEY(KEYRELEASE, 0)), addhandler);
+  sys_register(CONEVENT(KEY, CONKEY(KEYPRESS, 1)), addhandler);
+  sys_register(CONEVENT(KEY, CONKEY(KEYRELEASE, 1)), addhandler);
   // sys_register(CONEVENT(KEY, KEY_PRESS, 1), addhandler);
   // sys_register(CONEVENT(KEY, KEY_PRESS, 2), addhandler);
-  sys_register(CONEVENT(TIMER, 0, TIMER10MS), update);
-  sys_register(CONEVENT(TIMER, 0, TIMER1S), ok);
-  sys_register(CONEVENT(HALL, 0, HALLGETCLOSE), addhandler);
+  sys_register(CONEVENT(TIMER, TIMER10MS), update);
+  sys_register(CONEVENT(TIMER, TIMER1S), ok);
+  sys_register(CONEVENT(HALL, HALLGETCLOSE), addhandler);
+  sys_register(CONEVENT(NAV, CONNAV(NAVPRESS, NAVUP)), addhandler);
+  sys_register(CONEVENT(NAV, CONNAV(NAVRELEASE, NAVUP)), addhandler);
+  sys_register(CONEVENT(NAV, CONNAV(NAVPRESS, NAVDOWN)), addhandler);
+  // sys_register(CONEVENT)
 // sys_register(CONEVENT(HALL, 0, HALLGETAWAY), addhandler);
 // sys_register(CONEVENT(VIB, 0, VIBSTART), addhandler);
 #elif TEST == 1

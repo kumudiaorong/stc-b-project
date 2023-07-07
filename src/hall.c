@@ -4,7 +4,7 @@
 #include "string.h"
 #include "sys.h"
 
-static sys_callback_t hall_callback_table[2];
+static XDATA sys_callback_t hall_callback_table[2];
 
 static uint8_t hall_scan(void) {
   static uint8_t hall_state = __HALL_INI;
@@ -26,5 +26,5 @@ static void hall_callback(uint8_t msg) {
 void hall_init(void) {
   __HALL_INIT();
   memset(hall_callback_table, 0, sizeof(hall_callback_table));
-  __sys_add_sensor(HALL, hall_scan, hall_register, hall_callback);
+  __sys_add_sensor(HALL,  hall_register,hall_scan, hall_callback);
 }

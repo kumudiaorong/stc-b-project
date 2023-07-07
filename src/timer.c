@@ -3,7 +3,7 @@
 #include "detail/sys.h"
 #include "string.h"
 
-static sys_callback_t timer_callback_table[4];
+static XDATA sys_callback_t timer_callback_table[4];
 static uint8_t timer_scan(void) REENTRANT{
   uint8_t ret = 0;
   if(timer_callback_table[0])
@@ -76,5 +76,5 @@ static void timer_callback(uint8_t msg) REENTRANT {
 }
 void timer_init(void) {
   memset(timer_callback_table, 0, sizeof(timer_callback_table));
-  __sys_add_sensor(TIMER, timer_scan, timer_register, timer_callback);
+  __sys_add_sensor(TIMER, timer_register, timer_scan, timer_callback);
 }
