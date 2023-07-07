@@ -1,10 +1,40 @@
 #include "timer.h"
+
+#include <string.h>
+
 #include "def.h"
 #include "detail/sys.h"
-#include "string.h"
 
-static XDATA sys_callback_t timer_callback_table[4];
-static uint8_t timer_scan(void) REENTRANT{
+
+static XDATA sys_callback_t timer_callback_table[4];                 //!< timer callback table
+static void timer_register(uint8_t event, sys_callback_t callback);  //!< timer register function
+static uint8_t timer_scan(void) REENTRANT;                           //!< timer scan function
+static void timer_callback(uint8_t msg)REENTRANT;                             //!< timer callback function
+/**
+ * @fn timer_init
+ * @brief timer init
+ * @return none
+ */
+void timer_init(void) {
+  memset(timer_callback_table, 0, sizeof(timer_callback_table));
+  __sys_add_sensor(TIMER, timer_register, timer_scan, timer_callback);
+}
+/**
+ * @fn timer_register
+ * @brief timer register
+ * @param event event type
+ * @param callback callback function
+ * @return none
+ */
+static void timer_register(uint8_t event, sys_callback_t callback) {
+  timer_callback_table[event] = callback;
+}
+/**
+ * @fn timer_scan
+ * @brief timer scan
+ * @return msg bit 0-3 for 1ms, 10ms, 100ms, 1000ms
+ */
+static uint8_t timer_scan(void) REENTRANT {
   uint8_t ret = 0;
   if(timer_callback_table[0])
     ret |= 1;
@@ -25,9 +55,12 @@ static uint8_t timer_scan(void) REENTRANT{
   }
   return ret;
 }
-static void timer_register(uint8_t event, sys_callback_t callback) {
-  timer_callback_table[event] = callback;
-}
+/**
+ * @fn timer_callback
+ * @brief timer callback
+ * @param msg msg type
+ * @return none
+ */
 static void timer_callback(uint8_t msg) REENTRANT {
   // if(msg & 0x1){
   //   if(timer_callback_table[0]) {
@@ -73,8 +106,4 @@ static void timer_callback(uint8_t msg) REENTRANT {
   if((msg & 0x8)) {
     timer_callback_table[3]();
   }
-}
-void timer_init(void) {
-  memset(timer_callback_table, 0, sizeof(timer_callback_table));
-  __sys_add_sensor(TIMER, timer_register, timer_scan, timer_callback);
 }

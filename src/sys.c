@@ -2,6 +2,15 @@
 
 #include "detail/sys.h"
 #include "string.h"
+/**
+ * @fn __sys_add_sensor
+ * @brief add sensor
+ * @param event 
+ * @param _register 
+ * @param scan 
+ * @param callback 
+ * @return none
+ */
 void __sys_add_sensor(
   uint8_t event,__sys_func_register _register, __sys_func_scan scan,  __sys_func_callback callback) {
   __sys.sensor[event]._register = _register;
@@ -9,14 +18,26 @@ void __sys_add_sensor(
   __sys.sensor[event].callback = callback;
   __sys.sensor[event].msg = 0;
 }
+/**
+ * @fn sys_register
+ * @brief register sensor
+ * @param event event type
+ * @param callback callback function
+ * @return none
+ */
 void sys_register(uint8_t event, sys_callback_t callback) {
   __sys.sensor[event >> 4]._register(event & 0xf, callback);
 }
-uint32_t __sysclk = 0;
-XDATA __sys_t __sys;
+uint32_t __sysclk = 0;//!< system clock
+XDATA __sys_t __sys;//!< system
 
-uint32_t __sys_timer_cnt = 0;
-
+uint32_t __sys_timer_cnt = 0;//!< system timer count
+/**
+ * @fn sys_init
+ * @brief system init
+ * @param clk 
+ * @return none
+ */
 void sys_init(uint32_t clk) {
   memset(&__sys, 0, sizeof(__sys_t));
   __sysclk = clk;
@@ -31,7 +52,11 @@ void sys_init(uint32_t clk) {
   IP &= ~0x2;
   // PT0 = 0;
 }
-
+/**
+ * @fn sys_timer
+ * @brief system timer
+ * @return none
+ */
 INTERRUPT(sys_timer, TF0_VECTOR) {
   uint8_t i = 0;
   for(; i < SENSOR_CNT; ++i) {
@@ -41,6 +66,12 @@ INTERRUPT(sys_timer, TF0_VECTOR) {
   }
   ++__sys_timer_cnt;
 }
+/**
+ * @fn sys_exec
+ * @brief system exec
+ * @param callback 
+ * @return none
+ */
 void sys_exec(sys_callback_t callback) {
   IE |= 0x80;
   AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
@@ -63,13 +94,3 @@ void sys_exec(sys_callback_t callback) {
     }
   }
 }
-
-// INTERRUPT(timer, TF1_VECTOR) {
-//   int i = 0, j = 1;
-//   for(; i < 4; ++i, j *= 10) {
-//     if(timer_count % j == 0 && timer_callback_table[i]) {
-//       timer_callback_table[i]();
-//     }
-//   }
-//   ++timer_count;
-// }
