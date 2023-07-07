@@ -2,8 +2,12 @@
 
 #include "detail/sys.h"
 #include "string.h"
+static uint8_t sys_schedule_idx = 0;//!< system schedule index
+void __sys_schedule_add(__sys_func_schedule schedule){
+  __sys.schedule[sys_schedule_idx++] = schedule;
+}
 /**
- * @fn __sys_add_sensor
+ * @fn __sys_sensor_add
  * @brief add sensor
  * @param event 
  * @param _register 
@@ -11,7 +15,7 @@
  * @param callback 
  * @return none
  */
-void __sys_add_sensor(
+void __sys_sensor_add(
   uint8_t event,__sys_func_register _register, __sys_func_scan scan,  __sys_func_callback callback) {
   __sys.sensor[event]._register = _register;
   __sys.sensor[event].scan = scan;
@@ -86,11 +90,14 @@ void sys_exec(sys_callback_t callback) {
         __sys.sensor[i].msg = 0;
       }
     }
-    if(__sys.display_schedule) {
-      __sys.display_schedule();
+    if(__sys.schedule[0]) {
+      __sys.schedule[0]();
     }
     if(callback) {
       callback();
     }
   }
+}
+void __sys_sensor_set_msg(uint8_t event, uint8_t msg) {
+  __sys.sensor[event].msg |= msg;
 }

@@ -8,7 +8,7 @@ static XDATA sys_callback_t key_callback_table[__KEY_CNT][2] = {{0}, {0}, {0}}; 
 static XDATA uint8_t key_states = 0;  //!< key states,bit 0-2 for key1-3, 1 for press, 0 for release
 static void key_register(uint8_t event, sys_callback_t callback);  //!< key register function
 
-static void key_callback(uint8_t msg)REENTRANT;                             //!< key callback function
+static void key_callback(uint8_t msg) REENTRANT;  //!< key callback function
 /**
  * @fn key_init
  * @brief key init
@@ -17,7 +17,7 @@ static void key_callback(uint8_t msg)REENTRANT;                             //!<
 void key_init(void) {
   __KEY_INIT();
   memset(key_callback_table, 0, sizeof(key_callback_table));
-  __sys_add_sensor(KEY, key_register,
+  __sys_sensor_add(KEY, key_register,
 #ifdef __KEY_USE_INTERRUPT
     0
 #endif
@@ -26,7 +26,7 @@ void key_init(void) {
 #endif
     ,
     key_callback);
-  // __sys_add_sensor(KEY, key_scan, key_register, key_callback);
+  // __sys_sensor_add(KEY, key_scan, key_register, key_callback);
 }
 /**
  * @fn key_get
@@ -43,15 +43,15 @@ static XDATA uint8_t key_state[__KEY_CNT] = {0};  //!< key state
  * @return none
  */
 #ifdef __KEY_USE_INTERRUPT
-#define __KEY_BY_INT(idx, vec)                                                    \
-  INTERRUPT(__key##idx, vec) {                                                    \
-    static uint32_t lastT = 0;                                                    \
-    if(!lastT || __sys_timer_cnt - lastT > 20) {                                  \
-      if(key_callback_table[idx][(key_states >> idx) & 1])                        \
-        __sys.sensor[KEY].msg |= ((((key_states >> idx) & 1) + 1) << (idx << 1)); \
-      key_states ^= 1;                                                            \
-    }                                                                             \
-    lastT = __sys_timer_cnt;                                                      \
+#define __KEY_BY_INT(idx, vec)                                                      \
+  INTERRUPT(__key##idx, vec) {                                                      \
+    static uint32_t lastT = 0;                                                      \
+    if(!lastT || __sys_timer_cnt - lastT > 20) {                                    \
+      if(key_callback_table[idx][(key_states >> idx) & 1])                          \
+        __sys_sensor_set_msg(KEY, ((((key_states >> idx) & 1) + 1) << (idx << 1))); \
+      key_states ^= 1;                                                              \
+    }                                                                               \
+    lastT = __sys_timer_cnt;                                                        \
   }
 __KEY_BY_INT(0, IE0_VECTOR)
 __KEY_BY_INT(1, IE1_VECTOR)

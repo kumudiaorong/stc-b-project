@@ -17,7 +17,7 @@ static void vib_callback(uint8_t msg);//!< vib callback function
 void vib_init(void) {
   __VIB_INIT();
   memset(vib_callback_table, 0, sizeof(vib_callback_table));
-  __sys_add_sensor(VIB,  vib_register,vib_scan, vib_callback);
+  __sys_sensor_add(VIB,  vib_register,vib_scan, vib_callback);
 }
 /**
  * @fn vib_register

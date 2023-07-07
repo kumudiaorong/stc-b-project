@@ -9,7 +9,7 @@ static void display_schedule(void);//!< display schedule
  */
 void display_init(void) {
   __DISPLAY_INIT();
-  __sys.display_schedule = display_schedule;
+  __sys_schedule_add(display_schedule);
 }
 static XDATA uint8_t __display_en = 0;  //!< display enable
 /**

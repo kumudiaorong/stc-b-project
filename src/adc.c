@@ -16,7 +16,7 @@ void adc_init(void) {
   __ADC_INIT();
   memset(&adc, 0, sizeof(adc_t));
   memset(nav_callback_table, 0, sizeof(nav_callback_table));
-  __sys_add_sensor(NAV, nav_register, nav_scan, nav_callback);
+  __sys_sensor_add(NAV, nav_register, nav_scan, nav_callback);
   __ADC_START(ADCRT);
 }
 

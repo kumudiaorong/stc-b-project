@@ -17,7 +17,7 @@ static void timer_callback(uint8_t msg)REENTRANT;                             //
  */
 void timer_init(void) {
   memset(timer_callback_table, 0, sizeof(timer_callback_table));
-  __sys_add_sensor(TIMER, timer_register, timer_scan, timer_callback);
+  __sys_sensor_add(TIMER, timer_register, timer_scan, timer_callback);
 }
 /**
  * @fn timer_register
