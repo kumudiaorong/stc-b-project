@@ -2,7 +2,6 @@
 
 #include "def.h"
 #include "detail/sys.h"
-#include "string.h"
 #include "sys.h"
 static uint8_t __key_idx = 0;
 static XDATA sys_callback_t key_callback_table[__KEY_CNT][2] = {{0}, {0}, {0}};  //!< key callback table
@@ -20,7 +19,6 @@ uint8_t key_idx(void) {
  */
 void key_init(void) {
   __KEY_INIT();
-  memset(key_callback_table, 0, sizeof(key_callback_table));
   __key_idx = __sys_sensor_add(key_register,
 #ifdef __KEY_USE_INTERRUPT
     0

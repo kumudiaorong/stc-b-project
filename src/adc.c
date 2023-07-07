@@ -1,33 +1,49 @@
 #include "adc.h"
 
-#include <string.h>
-
 #include "def.h"
 #include "detail/sys.h"
 #include "sys.h"
 
-XDATA adc_t adc;  //!< adc data
-static XDATA sys_callback_t adc_callback_table[6][2];
-static void adc_register(uint8_t event, sys_callback_t callback);  //!< nav register function
-static uint8_t adc_scan(void) REENTRANT;                           //!< nav scan function
-static void adc_callback(uint8_t msg) REENTRANT;                   //!< nav callback function
-static uint8_t __adc_idx = 0;                                      //!< nav idx
-uint8_t adc_idx(void) {
-  return __adc_idx;
-}
+XDATA adc_t adc = {0};                                                                  //!< adc data
+static XDATA sys_callback_t adc_callback_table[6][2] = {{0}, {0}, {0}, {0}, {0}, {0}};  //!< adc callback table
+static void adc_register(uint8_t event, sys_callback_t callback);                       //!< nav register function
+static uint8_t adc_scan(void) REENTRANT;                                                //!< nav scan function
+static void adc_callback(uint8_t msg) REENTRANT;                                        //!< nav callback function
+static uint8_t __adc_idx = 0;                                                           //!< nav idx
+/**
+ * @fn adc_init
+ * @brief adc init
+ * @return none
+ */
 void adc_init(void) {
   __ADC_INIT();
-  memset(&adc, 0, sizeof(adc_t));
-  memset(adc_callback_table, 0, sizeof(adc_callback_table));
   __adc_idx = __sys_sensor_add(adc_register, adc_scan, adc_callback);
   __ADC_START(ADCRT);
 }
-
+/**
+ * @fn adc_idx
+ * @brief get adc idx
+ * @return adc idx
+ */
+uint8_t adc_idx(void) {
+  return __adc_idx;
+}
+/**
+ * @fn adc_register
+ * @brief adc register
+ * @param event event type
+ * @param callback callback function
+ * @return none
+ */
 static void adc_register(uint8_t event, sys_callback_t callback) {
   adc_callback_table[event & 0x7][event >> 3] = callback;
 }
 static XDATA uint8_t flag = 0;  //!< adc flag, use bit 0-1 for idx in __adc, use bit 2 for response in adc_scan
-
+/**
+ * @fn adc_scan
+ * @brief adc scan
+ * @return msg bit 0-2 for navpress, bit 3-5 for navrelease
+ */
 static uint8_t adc_scan(void) REENTRANT {
   static uint32_t lastT = 0;
   static uint8_t last = NAVNONE, start = NAVNONE;
@@ -53,7 +69,12 @@ static uint8_t adc_scan(void) REENTRANT {
   }
   return ret;
 }
-
+/**
+ * @fn adc_callback
+ * @brief adc callback
+ * @param msg msg type
+ * @return none
+ */
 static void adc_callback(uint8_t msg) REENTRANT {
   if(msg & 0x7) {
     adc_callback_table[(msg & 0x7) - 1][0]();
@@ -73,7 +94,11 @@ static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 
   -16, -16, -17, -18, -19, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38,
   -40};                                                         //!< adc temperature table
 static uint8_t CODE __adc_channel[] = {ADCRT, ADCROP, ADCNAV};  //!< adc channel table
-
+/**
+ * @fn __adc
+ * @brief adc interrupt function
+ * @return none
+ */
 INTERRUPT_USING(__adc, ADC_VECTOR, ADC_INT_PRIORITY) {
   static XDATA uint32_t sum = 0;
   static XDATA uint16_t count = 0, avgCnt = 50;

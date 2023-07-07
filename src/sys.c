@@ -1,23 +1,51 @@
 #include "sys.h"
 
 #include "detail/sys.h"
-#include "string.h"
 
+/**
+ * @struct __sensor_t
+ * @brief sensor struct
+ * @var __sensor_t::_register register callback function
+ * @var __sensor_t::scan scan callback function
+ * @var __sensor_t::callback callback function
+ */
+typedef struct {
+  __sys_sensor_register _register;
+  __sys_sensor_scan scan;
+  __sys_sensor_callback callback;
+  uint8_t msg;
+} __sensor_t;
+/**
+ * @struct __sys_t
+ * @brief system struct
+ * @var __sys_t::sensor sensor array
+ * @var __sys_t::schedule schedule array
+ */
+typedef struct {
+  __sensor_t sensor[SENSOR_CNT];
+  __sys_schedule schedule[SCHDULE_CNT];
+} __sys_t;
 static uint8_t sys_schedule_idx = 0;  //!< system schedule index
-void __sys_schedule_add(__sys_func_schedule schedule) {
+XDATA __sys_t __sys = {{0}, {0}};     //!< system
+/**
+ * @fn __sys_schedule_add
+ * @brief add schedule
+ * @param schedule
+ * @return none
+ */
+void __sys_schedule_add(__sys_schedule schedule) {
   __sys.schedule[sys_schedule_idx++] = schedule;
 }
 static uint8_t sys_sensor_idx = 0;  //!< system sensor index
 /**
  * @fn __sys_sensor_add
  * @brief add sensor
- * @param event
  * @param _register
  * @param scan
  * @param callback
- * @return none
+ * @return sensor index
  */
-uint8_t __sys_sensor_add(__sys_func_register _register, __sys_func_scan scan, __sys_func_callback callback) {
+uint8_t __sys_sensor_add(__sys_sensor_register _register, __sys_sensor_scan scan, __sys_sensor_callback callback) {
   __sys.sensor[sys_sensor_idx]._register = _register;
   __sys.sensor[sys_sensor_idx].scan = scan;
   __sys.sensor[sys_sensor_idx].callback = callback;
@@ -34,10 +62,8 @@ uint8_t __sys_sensor_add(__sys_func_register _register, __sys_func_scan scan, __
 void sys_register(uint8_t event, sys_callback_t callback) {
   __sys.sensor[event >> 4]._register(event & 0xf, callback);
 }
-uint32_t __sysclk = 0;  //!< system clock
-XDATA __sys_t __sys;    //!< system
 
-uint32_t __sys_timer_cnt = 0;  //!< system timer count
+uint32_t __sysclk = 0;  //!< system clock
 /**
  * @fn sys_init
  * @brief system init
@@ -45,7 +71,6 @@ uint32_t __sys_timer_cnt = 0;  //!< system timer count
  * @return none
  */
 void sys_init(uint32_t clk) {
-  memset(&__sys, 0, sizeof(__sys_t));
   __sysclk = clk;
   TMOD = 0x00;  // T0和T1都是工作在模式0下,即16位自动重装载模式
   TH0 = (65535 - __sysclk / 1000) >> 8;
@@ -58,6 +83,7 @@ void sys_init(uint32_t clk) {
   IP &= ~0x2;
   // PT0 = 0;
 }
+uint32_t __sys_timer_cnt = 0;  //!< system timer count
 /**
  * @fn sys_timer
  * @brief system timer
@@ -78,8 +104,7 @@ INTERRUPT(sys_timer, TF0_VECTOR) {
  * @param callback
  * @return none
  */
-#include "display.h"
-void sys_exec(void (*callback)(void) REENTRANT) {
+void sys_exec(sys_callback_t callback) {
   IE |= 0x80;
   AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
   TCON |= 0x10;
@@ -93,15 +118,22 @@ void sys_exec(void (*callback)(void) REENTRANT) {
         __sys.sensor[i].msg = 0;
       }
     }
-    if(__sys.schedule[0]) {
-      __sys.schedule[0]();
-    }
+    for(i = 0; i < SCHDULE_CNT; ++i)
+      if(__sys.schedule[i]) {
+        __sys.schedule[i]();
+      }
     if(callback) {
       callback();
-      // display_num(__sys_timer_cnt);
     }
   }
 }
-void __sys_sensor_set_msg(uint8_t event, uint8_t msg) {
-  __sys.sensor[event].msg |= msg;
+/**
+ * @fn __sys_sensor_set_msg
+ * @brief set sensor msg
+ * @param idx
+ * @param msg
+ * @return none
+ */
+void __sys_sensor_set_msg(uint8_t idx, uint8_t msg) {
+  __sys.sensor[idx].msg |= msg;
 }

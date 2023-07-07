@@ -1,12 +1,11 @@
 #include "timer.h"
 
-#include <string.h>
 
 #include "def.h"
 #include "detail/sys.h"
 static uint8_t __timer_idx = 0;
 
-static XDATA sys_callback_t timer_callback_table[4];                 //!< timer callback table
+static XDATA sys_callback_t timer_callback_table[4]={0};                 //!< timer callback table
 static void timer_register(uint8_t event, sys_callback_t callback);  //!< timer register function
 static uint8_t timer_scan(void) REENTRANT;                           //!< timer scan function
 static void timer_callback(uint8_t msg) REENTRANT;                   //!< timer callback function
@@ -19,7 +18,6 @@ uint8_t timer_idx(void) {
  * @return none
  */
 void timer_init(void) {
-  memset(timer_callback_table, 0, sizeof(timer_callback_table));
   __timer_idx = __sys_sensor_add(timer_register, timer_scan, timer_callback);
 }
 /**
