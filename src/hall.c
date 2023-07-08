@@ -4,14 +4,11 @@
 #include "detail/sys.h"
 #include "sys.h"
 
-static uint8_t __hall_idx = 0;
+uint8_t HALL = 0;
 static XDATA sys_callback_t hall_callback_table[2] = {0};            //!< hall callback table
 static void hall_register(uint8_t event, sys_callback_t callback);  //!< hall register function
 static uint8_t hall_scan(void);                                     //!< hall scan function
 static void hall_callback(uint8_t msg);                             //!< hall callback function
-uint8_t hall_idx(void) {
-  return __hall_idx;
-}
 /**
  * @fn hall_init
  * @brief hall init
@@ -19,7 +16,7 @@ uint8_t hall_idx(void) {
  */
 void hall_init(void) {
   __HALL_INIT();
-  __hall_idx = __sys_sensor_add(hall_register, hall_scan, hall_callback);
+  HALL = __sys_sensor_add(hall_register, hall_scan, hall_callback);
 }
 /**
  * @fn hall_register

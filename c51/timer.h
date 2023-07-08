@@ -4,5 +4,5 @@
 #include "sys.h"
 enum TimerEvent { TIMER1MS, TIMER10MS, TIMER100MS, TIMER1S };
 void timer_init(void);
-uint8_t timer_idx(void);
+extern uint8_t TIMER;
 #endif

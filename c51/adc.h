@@ -65,7 +65,7 @@ typedef struct {
   uint8_t rop;
   uint8_t nav;
 } adc_t;
-extern XDATA adc_t adc;
+extern XDATA adc_t adcs;
 void adc_init(void);
-uint8_t adc_idx(void);
+extern uint8_t ADC; 
 #endif

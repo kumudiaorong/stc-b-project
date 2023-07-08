@@ -9,6 +9,6 @@
 enum HallEvent { HALLNONE = 0, HALLGETCLOSE = 1, HALLGETAWAY = 2 };
 
 void hall_init(void);
-uint8_t hall_idx(void);
+extern uint8_t HALL;
 
 #endif

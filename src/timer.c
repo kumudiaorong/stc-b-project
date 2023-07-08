@@ -3,22 +3,19 @@
 
 #include "def.h"
 #include "detail/sys.h"
-static uint8_t __timer_idx = 0;
+uint8_t TIMER = 0;
 
 static XDATA sys_callback_t timer_callback_table[4]={0};                 //!< timer callback table
 static void timer_register(uint8_t event, sys_callback_t callback);  //!< timer register function
 static uint8_t timer_scan(void) REENTRANT;                           //!< timer scan function
 static void timer_callback(uint8_t msg) REENTRANT;                   //!< timer callback function
-uint8_t timer_idx(void) {
-  return __timer_idx;
-}
 /**
  * @fn timer_init
  * @brief timer init
  * @return none
  */
 void timer_init(void) {
-  __timer_idx = __sys_sensor_add(timer_register, timer_scan, timer_callback);
+  TIMER = __sys_sensor_add(timer_register, timer_scan, timer_callback);
 }
 /**
  * @fn timer_register

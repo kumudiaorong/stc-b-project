@@ -4,12 +4,12 @@
 #include "detail/sys.h"
 #include "sys.h"
 
-XDATA adc_t adc = {0};                                                                  //!< adc data
+XDATA adc_t adcs = {0};                                                                  //!< adc data
 static XDATA sys_callback_t adc_callback_table[6][2] = {{0}, {0}, {0}, {0}, {0}, {0}};  //!< adc callback table
 static void adc_register(uint8_t event, sys_callback_t callback);                       //!< nav register function
 static uint8_t adc_scan(void) REENTRANT;                                                //!< nav scan function
 static void adc_callback(uint8_t msg) REENTRANT;                                        //!< nav callback function
-static uint8_t __adc_idx = 0;                                                           //!< nav idx
+uint8_t ADC = 0;                                                           //!< nav idx
 /**
  * @fn adc_init
  * @brief adc init
@@ -17,16 +17,8 @@ static uint8_t __adc_idx = 0;                                                   
  */
 void adc_init(void) {
   __ADC_INIT();
-  __adc_idx = __sys_sensor_add(adc_register, adc_scan, adc_callback);
+  ADC = __sys_sensor_add(adc_register, adc_scan, adc_callback);
   __ADC_START(ADCRT);
-}
-/**
- * @fn adc_idx
- * @brief get adc idx
- * @return adc idx
- */
-uint8_t adc_idx(void) {
-  return __adc_idx;
 }
 /**
  * @fn adc_register
@@ -48,7 +40,7 @@ static uint8_t adc_scan(void) REENTRANT {
   static uint8_t last = NAVNONE, start = NAVNONE, nav_state = 0;
   uint8_t cur;
   __sys_lock();
-  cur = adc.nav;
+  cur =adcs.nav;
   __sys_unlock();
   if(cur != start) {
     start = cur;
@@ -106,15 +98,15 @@ INTERRUPT_USING(__adc, ADC_VECTOR, ADC_INT_PRIORITY) {
   ++count;
   if(count == avgCnt) {
     if(idx == 0x2) {
-      adc.nav = ((sum + (avgCnt >> 1)) / avgCnt) >> 7;
+     adcs.nav = ((sum + (avgCnt >> 1)) / avgCnt) >> 7;
       flag &= ~0x3;
     } else {
       switch(idx) {
         case 0 :
-          adc.rt = __d2t[(((sum + (avgCnt >> 1)) / avgCnt) >> 2) - 1];
+         adcs.rt = __d2t[(((sum + (avgCnt >> 1)) / avgCnt) >> 2) - 1];
           break;
         case 1 :
-          adc.rop = (sum + (avgCnt >> 1)) / avgCnt;
+         adcs.rop = (sum + (avgCnt >> 1)) / avgCnt;
           break;
         default :
           break;
