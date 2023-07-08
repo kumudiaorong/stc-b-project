@@ -45,29 +45,28 @@ static XDATA uint8_t flag = 0;  //!< adc flag, use bit 0-1 for idx in __adc, use
  * @return msg bit 0-2 for navpress, bit 3-5 for navrelease
  */
 static uint8_t adc_scan(void) REENTRANT {
-  static uint32_t lastT = 0;
-  static uint8_t last = NAVNONE, start = NAVNONE;
-  uint8_t cur, ret = 0;
+  static uint8_t last = NAVNONE, start = NAVNONE, nav_state = 0;
+  uint8_t cur;
   __sys_lock();
   cur = adc.nav;
   __sys_unlock();
   if(cur != start) {
     start = cur;
-    lastT = __sys_timer_cnt;
-    flag |= 0x4;
-  } else if(flag & 0x4) {
-    if(__sys_timer_cnt - lastT > 10) {
-      flag &= ~0x4;
+    nav_state = 10;
+  } else if(nav_state != 0) {
+    --nav_state;
+    if(nav_state == 0) {
       if(start != NAVNONE && adc_callback_table[start][NAVPRESS]) {
         last = start;
-        ret = start + 1;
+        return start + 1;
       } else if(start == NAVNONE && last != NAVNONE && adc_callback_table[last][NAVRELEASE]) {
-        ret = (last + 1) << 3;
+        start = (last + 1) << 3;
         last = NAVNONE;
+        return start;
       }
     }
   }
-  return ret;
+  return 0;
 }
 /**
  * @fn adc_callback

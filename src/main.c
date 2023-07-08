@@ -28,6 +28,7 @@
 #if TEST == 0
 uint32_t i = 0;
 void update(void) {
+  // i = adc.rop;
   display_num(i);
 }
 void addhandler(void) {
