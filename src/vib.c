@@ -2,12 +2,13 @@
 
 #include "detail/sys.h"
 #include "sys.h"
+#define __VIB_MASK (0x1 << ((sizeof(__sys_msg_t) << 3) - 1))
 uint8_t VIB = 0;
-static XDATA sys_callback_t vib_callback_table[2] = {0};           //!< vib callback table
-static XDATA uint8_t vib_state = 0;                                //!< vib state
+static XDATA sys_callback_t vib_callback_table[2] = {0};          //!< vib callback table
+static XDATA uint8_t vib_state = 0;                               //!< vib state
 static void vib_register(uint32_t cfg, sys_callback_t callback);  //!< vib register function
-static uint8_t vib_scan(void);                                     //!< vib scan function
-static void vib_callback(uint8_t msg);                             //!< vib callback function
+static uint8_t vib_scan(void);                                    //!< vib scan function
+static void vib_callback(uint8_t msg);                            //!< vib callback function
 /**
  * @fn vib_init
  * @brief vib init
@@ -25,24 +26,24 @@ void vib_init(void) {
  * @return none
  */
 static void vib_register(uint32_t cfg, sys_callback_t callback) {
-  vib_callback_table[cfg - 1] = callback;
+  vib_callback_table[cfg] = callback;
 }
 /**
  * @fn vib_scan
  * @brief vib scan
  * @return msg 1 for vib start, 2 for vib stop
  */
-static uint8_t vib_scan(void) {
-  uint8_t ret = 0;
+static __sys_msg_t vib_scan(void) {
+  __sys_msg_t ret = 0;
   if(GET_VIB()) {
     if(vib_state == 0 && vib_callback_table[0]) {
-      ret |= VIBSTART;
+      ret |= VIBSTART | __VIB_MASK;
     }
     vib_state = 20;
   } else if(vib_state != 0) {
     --vib_state;
     if(vib_state == 0 && vib_callback_table[1]) {
-      ret |= VIBSTOP;
+      ret |= VIBSTOP | __VIB_MASK;
     }
   }
   return ret;
@@ -53,6 +54,6 @@ static uint8_t vib_scan(void) {
  * @param msg msg type
  * @return none
  */
-static void vib_callback(uint8_t msg) {
-  vib_callback_table[msg - 1]();
+static void vib_callback(__sys_msg_t msg) {
+  vib_callback_table[msg & ~__VIB_MASK]();
 }

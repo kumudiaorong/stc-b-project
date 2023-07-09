@@ -3,6 +3,7 @@
 #include "def.h"
 #include "detail/sys.h"
 #include "sys.h"
+#define __MSG_MASK (0x1 << ((sizeof(__sys_msg_t) << 3) - 1))
 uint8_t KEY = 0;
 static XDATA sys_callback_t key_callback_table[__KEY_CNT][2] = {{0}, {0}, {0}};  //!< key callback table
 static XDATA uint8_t key_states = 0;  //!< key states,bit 0-2 for key1-3, 1 for press, 0 for release
@@ -47,9 +48,9 @@ static XDATA uint8_t key_state[__KEY_CNT] = {0};  //!< key state
     static uint32_t lastT = 0;                                                      \
     if(!lastT || __sys_timer_cnt - lastT > 20) {                                    \
       if(key_callback_table[idx][(key_states >> idx) & 1]) {                        \
-        __sys_sensor_set_msg(KEY, ((((key_states >> idx) & 1) + 1) << (idx << 1))); \
+        __sys_sensor_set_msg(KEY, (__MSG_MASK >> idx) | (key_states & (1 << idx))); \
       }                                                                             \
-      key_states ^= 1;                                                              \
+      key_states ^= 1 << idx;                                                       \
     }                                                                               \
     lastT = __sys_timer_cnt;                                                        \
   }
@@ -65,7 +66,7 @@ __KEY_BY_INT(1, IE1_VECTOR)
  * @return none
  */
 static void key_register(uint32_t cfg, sys_callback_t callback) {
-  key_callback_table[cfg >> 2][(cfg & 0x3) - 1] = callback;
+  key_callback_table[cfg >> 2][cfg & 0x3] = callback;
 }
 /**
  * @fn key_callback
@@ -73,12 +74,11 @@ static void key_register(uint32_t cfg, sys_callback_t callback) {
  * @param msg msg type
  * @return none
  */
-static void key_callback(uint8_t msg) REENTRANT {
+static void key_callback(__sys_msg_t msg) REENTRANT {
   uint8_t i = 0;
   for(; i < __KEY_CNT; ++i) {
-    uint8_t event = (msg >> (i << 1)) & 0x3;
-    if(event) {
-      key_callback_table[i][event - 1]();
+    if((msg << i) & __MSG_MASK) {
+      key_callback_table[i][(msg >> i) & 1]();
     }
   }
 }

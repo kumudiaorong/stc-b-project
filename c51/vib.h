@@ -3,7 +3,7 @@
 #include "def.h"
 #define GET_VIB() (uint8_t)(P2_4 == 0)
 #define __VIB_INIT() __DO_WHILE0(P2M0 &= ~(1 << 4); P2M1 |= 1 << 4; P2_4 = 1)
-enum VibEvent { VIBNONE = 0, VIBSTART = 1, VIBSTOP = 2 };
+enum VibEvent { VIBSTART, VIBSTOP, VIBNONE };
 void vib_init(void);
 extern uint8_t VIB;
 #endif

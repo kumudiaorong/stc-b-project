@@ -3,7 +3,6 @@
 #include "detail/sys.h"
 #include "sys.h"
 
-
 uint8_t HALL = 0;
 static XDATA sys_callback_t hall_callback_table[2] = {0};          //!< hall callback table
 static void hall_register(uint32_t cfg, sys_callback_t callback);  //!< hall register function
@@ -26,20 +25,20 @@ void hall_init(void) {
  * @return none
  */
 static void hall_register(uint32_t cfg, sys_callback_t callback) {
-  hall_callback_table[cfg - 1] = callback;
+  hall_callback_table[cfg] = callback;
 }
 /**
  * @fn hall_scan
  * @brief hall scan
  * @return msg 1 for hall get close, 2 for hall get away
  */
-static uint8_t hall_scan(void) {
+static __sys_msg_t hall_scan(void) {
   static uint8_t hall_state = __HALL_INI;
-  uint8_t ret = 0;
+  __sys_msg_t ret = 0;
   if(hall_state != __HALL) {
     hall_state = __HALL;
     if(hall_callback_table[hall_state]) {
-      ret |= (hall_state + 1);
+      ret |= hall_state | 0x80;
     }
   }
   return ret;
@@ -50,6 +49,6 @@ static uint8_t hall_scan(void) {
  * @param msg msg type
  * @return none
  */
-static void hall_callback(uint8_t msg) {
-  hall_callback_table[msg - 1]();
+static void hall_callback(__sys_msg_t msg) {
+  hall_callback_table[msg & 0x7f]();
 }

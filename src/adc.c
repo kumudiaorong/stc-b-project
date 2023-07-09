@@ -7,8 +7,8 @@
 XDATA adc_t adcs = {0};                                                                 //!< adc data
 static XDATA sys_callback_t adc_callback_table[6][2] = {{0}, {0}, {0}, {0}, {0}, {0}};  //!< adc callback table
 static void adc_register(uint32_t cfg, sys_callback_t callback);                        //!< nav register function
-static uint8_t adc_scan(void) REENTRANT;                                                //!< nav scan function
-static void adc_callback(uint8_t msg) REENTRANT;                                        //!< nav callback function
+static __sys_msg_t adc_scan(void) REENTRANT;                                                //!< nav scan function
+static void adc_callback(__sys_msg_t msg) REENTRANT;                                        //!< nav callback function
 uint8_t ADC = 0;                                                                        //!< nav idx
 /**
  * @fn adc_init
@@ -36,7 +36,7 @@ static XDATA uint8_t flag = 0;  //!< adc flag, use bit 0-1 for idx in __adc, use
  * @brief adc scan
  * @return msg bit 0-2 for navpress, bit 3-5 for navrelease
  */
-static uint8_t adc_scan(void) REENTRANT {
+static __sys_msg_t adc_scan(void) REENTRANT {
   static uint8_t last = NAVNONE, start = NAVNONE, nav_state = 0;
   uint8_t cur;
   __sys_lock();
@@ -66,7 +66,7 @@ static uint8_t adc_scan(void) REENTRANT {
  * @param msg msg type
  * @return none
  */
-static void adc_callback(uint8_t msg) REENTRANT {
+static void adc_callback(__sys_msg_t msg) REENTRANT {
   if(msg & 0x7) {
     adc_callback_table[(msg & 0x7) - 1][0]();
   }

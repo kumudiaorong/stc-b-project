@@ -7,8 +7,8 @@ uint8_t TIMER = 0;
 
 static XDATA sys_callback_t timer_callback_table[4]={0};                 //!< timer callback table
 static void timer_register(uint32_t cfg, sys_callback_t callback);  //!< timer register function
-static uint8_t timer_scan(void) REENTRANT;                           //!< timer scan function
-static void timer_callback(uint8_t msg) REENTRANT;                   //!< timer callback function
+static __sys_msg_t timer_scan(void) REENTRANT;                           //!< timer scan function
+static void timer_callback(__sys_msg_t msg) REENTRANT;                   //!< timer callback function
 /**
  * @fn timer_init
  * @brief timer init
@@ -32,8 +32,8 @@ static void timer_register(uint32_t cfg, sys_callback_t callback) {
  * @brief timer scan
  * @return msg bit 0-3 for 1ms, 10ms, 100ms, 1000ms
  */
-static uint8_t timer_scan(void) REENTRANT {
-  uint8_t ret = 0;
+static __sys_msg_t timer_scan(void) REENTRANT {
+  __sys_msg_t ret = 0;
   if(timer_callback_table[0])
     ret |= 1;
   if(__sys_timer_cnt % 10 == 0) {
@@ -59,7 +59,7 @@ static uint8_t timer_scan(void) REENTRANT {
  * @param msg msg type
  * @return none
  */
-static void timer_callback(uint8_t msg) REENTRANT {
+static void timer_callback(__sys_msg_t msg) REENTRANT {
   // if(msg & 0x1){
   //   if(timer_callback_table[0]) {
   //     timer_callback_table[0]();

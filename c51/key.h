@@ -33,8 +33,8 @@
 #ifdef __KEY_USE_POLLING
 #define __KEY_INIT()
 #endif
-enum KeyEvent { KEYNONE = 0, KEYPRESS = 1, KEYRELEASE = 2 };
-enum KeyNum { KEY1 = 0, KEY2 = 1, KEY3 = 2 };
+enum KeyEvent { KEYPRESS, KEYRELEASE, KEYNONE };
+enum KeyNum { KEY1, KEY2, KEY3 };
 void key_init(void);
 uint8_t key_get(void);
 extern uint8_t KEY;
