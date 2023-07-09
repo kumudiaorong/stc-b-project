@@ -4,12 +4,12 @@
 #include "detail/sys.h"
 #include "sys.h"
 
-XDATA adc_t adcs = {0};                                                                  //!< adc data
+XDATA adc_t adcs = {0};                                                                 //!< adc data
 static XDATA sys_callback_t adc_callback_table[6][2] = {{0}, {0}, {0}, {0}, {0}, {0}};  //!< adc callback table
-static void adc_register(uint8_t event, sys_callback_t callback);                       //!< nav register function
+static void adc_register(uint32_t cfg, sys_callback_t callback);                        //!< nav register function
 static uint8_t adc_scan(void) REENTRANT;                                                //!< nav scan function
 static void adc_callback(uint8_t msg) REENTRANT;                                        //!< nav callback function
-uint8_t ADC = 0;                                                           //!< nav idx
+uint8_t ADC = 0;                                                                        //!< nav idx
 /**
  * @fn adc_init
  * @brief adc init
@@ -27,8 +27,8 @@ void adc_init(void) {
  * @param callback callback function
  * @return none
  */
-static void adc_register(uint8_t event, sys_callback_t callback) {
-  adc_callback_table[event & 0x7][event >> 3] = callback;
+static void adc_register(uint32_t cfg, sys_callback_t callback) {
+  adc_callback_table[cfg >> 1][cfg & 1] = callback;
 }
 static XDATA uint8_t flag = 0;  //!< adc flag, use bit 0-1 for idx in __adc, use bit 2 for response in adc_scan
 /**
@@ -40,7 +40,7 @@ static uint8_t adc_scan(void) REENTRANT {
   static uint8_t last = NAVNONE, start = NAVNONE, nav_state = 0;
   uint8_t cur;
   __sys_lock();
-  cur =adcs.nav;
+  cur = adcs.nav;
   __sys_unlock();
   if(cur != start) {
     start = cur;
@@ -98,15 +98,15 @@ INTERRUPT_USING(__adc, ADC_VECTOR, ADC_INT_PRIORITY) {
   ++count;
   if(count == avgCnt) {
     if(idx == 0x2) {
-     adcs.nav = ((sum + (avgCnt >> 1)) / avgCnt) >> 7;
+      adcs.nav = ((sum + (avgCnt >> 1)) / avgCnt) >> 7;
       flag &= ~0x3;
     } else {
       switch(idx) {
         case 0 :
-         adcs.rt = __d2t[(((sum + (avgCnt >> 1)) / avgCnt) >> 2) - 1];
+          adcs.rt = __d2t[(((sum + (avgCnt >> 1)) / avgCnt) >> 2) - 1];
           break;
         case 1 :
-         adcs.rop = (sum + (avgCnt >> 1)) / avgCnt;
+          adcs.rop = (sum + (avgCnt >> 1)) / avgCnt;
           break;
         default :
           break;

@@ -6,7 +6,7 @@
 #define __KEY_3 P1_7
 #define __KEY_CNT 3
 #define __KEY_PRESS(x) (x == 0)
-#define CONKEY(event, key) ((event << 2) | key)
+#define CONKEY(key, event) (key << 2 | event)
 /**
  * @brief use interrupt to detect key
  *

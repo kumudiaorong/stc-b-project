@@ -6,7 +6,7 @@
 uint8_t KEY = 0;
 static XDATA sys_callback_t key_callback_table[__KEY_CNT][2] = {{0}, {0}, {0}};  //!< key callback table
 static XDATA uint8_t key_states = 0;  //!< key states,bit 0-2 for key1-3, 1 for press, 0 for release
-static void key_register(uint8_t event, sys_callback_t callback);  //!< key register function
+static void key_register(uint32_t cfg, sys_callback_t callback);  //!< key register function
 
 static void key_callback(uint8_t msg) REENTRANT;  //!< key callback function
 /**
@@ -42,16 +42,16 @@ static XDATA uint8_t key_state[__KEY_CNT] = {0};  //!< key state
  * @return none
  */
 #ifdef __KEY_USE_INTERRUPT
-#define __KEY_BY_INT(idx, vec)                                                            \
-  INTERRUPT(__key##idx, vec) {                                                            \
-    static uint32_t lastT = 0;                                                            \
-    if(!lastT || __sys_timer_cnt - lastT > 20) {                                          \
-      if(key_callback_table[idx][(key_states >> idx) & 1]) {                              \
+#define __KEY_BY_INT(idx, vec)                                                      \
+  INTERRUPT(__key##idx, vec) {                                                      \
+    static uint32_t lastT = 0;                                                      \
+    if(!lastT || __sys_timer_cnt - lastT > 20) {                                    \
+      if(key_callback_table[idx][(key_states >> idx) & 1]) {                        \
         __sys_sensor_set_msg(KEY, ((((key_states >> idx) & 1) + 1) << (idx << 1))); \
-      }                                                                                   \
-      key_states ^= 1;                                                                    \
-    }                                                                                     \
-    lastT = __sys_timer_cnt;                                                              \
+      }                                                                             \
+      key_states ^= 1;                                                              \
+    }                                                                               \
+    lastT = __sys_timer_cnt;                                                        \
   }
 __KEY_BY_INT(0, IE0_VECTOR)
 __KEY_BY_INT(1, IE1_VECTOR)
@@ -64,8 +64,8 @@ __KEY_BY_INT(1, IE1_VECTOR)
  * @param callback callback function
  * @return none
  */
-static void key_register(uint8_t event, sys_callback_t callback) {
-  key_callback_table[event & 0x3][(event >> 2) - 1] = callback;
+static void key_register(uint32_t cfg, sys_callback_t callback) {
+  key_callback_table[cfg >> 2][(cfg & 0x3) - 1] = callback;
 }
 /**
  * @fn key_callback

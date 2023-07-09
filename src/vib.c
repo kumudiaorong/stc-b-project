@@ -5,7 +5,7 @@
 uint8_t VIB = 0;
 static XDATA sys_callback_t vib_callback_table[2] = {0};           //!< vib callback table
 static XDATA uint8_t vib_state = 0;                                //!< vib state
-static void vib_register(uint8_t event, sys_callback_t callback);  //!< vib register function
+static void vib_register(uint32_t cfg, sys_callback_t callback);  //!< vib register function
 static uint8_t vib_scan(void);                                     //!< vib scan function
 static void vib_callback(uint8_t msg);                             //!< vib callback function
 /**
@@ -24,8 +24,8 @@ void vib_init(void) {
  * @param callback callback function
  * @return none
  */
-static void vib_register(uint8_t event, sys_callback_t callback) {
-  vib_callback_table[event - 1] = callback;
+static void vib_register(uint32_t cfg, sys_callback_t callback) {
+  vib_callback_table[cfg - 1] = callback;
 }
 /**
  * @fn vib_scan

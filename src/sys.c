@@ -64,8 +64,8 @@ uint8_t __sys_sensor_add(__sys_sensor_register _register, __sys_sensor_scan scan
  * @param callback callback function
  * @return none
  */
-void sys_register(uint8_t event, sys_callback_t callback) {
-  __sys.sensor[event >> 4]._register(event & 0xf, callback);
+void sys_register(uint8_t idx, sys_callback_t callback, uint32_t cfg) {
+  __sys.sensor[idx]._register(cfg, callback);
 }
 
 uint32_t __sysclk = 0;  //!< system clock

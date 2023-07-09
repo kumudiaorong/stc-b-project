@@ -3,7 +3,7 @@
 #include "def.h"
 #define ADC_VECTOR 5
 #define ADC_INT_PRIORITY 1
-#define CONNAV(event, key) ((event << 3) | key)
+#define CONNAV(key, event) (key << 1 | event)
 #define __ADC_USE_INTERRUPT  //
 
 #ifdef __ADC_USE_INTERRUPT
@@ -67,5 +67,5 @@ typedef struct {
 } adc_t;
 extern XDATA adc_t adcs;
 void adc_init(void);
-extern uint8_t ADC; 
+extern uint8_t ADC;
 #endif

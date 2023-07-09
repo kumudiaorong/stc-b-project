@@ -1,14 +1,14 @@
 #include "hall.h"
 
-
 #include "detail/sys.h"
 #include "sys.h"
 
+
 uint8_t HALL = 0;
-static XDATA sys_callback_t hall_callback_table[2] = {0};            //!< hall callback table
-static void hall_register(uint8_t event, sys_callback_t callback);  //!< hall register function
-static uint8_t hall_scan(void);                                     //!< hall scan function
-static void hall_callback(uint8_t msg);                             //!< hall callback function
+static XDATA sys_callback_t hall_callback_table[2] = {0};          //!< hall callback table
+static void hall_register(uint32_t cfg, sys_callback_t callback);  //!< hall register function
+static uint8_t hall_scan(void);                                    //!< hall scan function
+static void hall_callback(uint8_t msg);                            //!< hall callback function
 /**
  * @fn hall_init
  * @brief hall init
@@ -25,8 +25,8 @@ void hall_init(void) {
  * @param callback callback function
  * @return none
  */
-static void hall_register(uint8_t event, sys_callback_t callback) {
-  hall_callback_table[event - 1] = callback;
+static void hall_register(uint32_t cfg, sys_callback_t callback) {
+  hall_callback_table[cfg - 1] = callback;
 }
 /**
  * @fn hall_scan

@@ -6,7 +6,7 @@
 uint8_t TIMER = 0;
 
 static XDATA sys_callback_t timer_callback_table[4]={0};                 //!< timer callback table
-static void timer_register(uint8_t event, sys_callback_t callback);  //!< timer register function
+static void timer_register(uint32_t cfg, sys_callback_t callback);  //!< timer register function
 static uint8_t timer_scan(void) REENTRANT;                           //!< timer scan function
 static void timer_callback(uint8_t msg) REENTRANT;                   //!< timer callback function
 /**
@@ -24,8 +24,8 @@ void timer_init(void) {
  * @param callback callback function
  * @return none
  */
-static void timer_register(uint8_t event, sys_callback_t callback) {
-  timer_callback_table[event] = callback;
+static void timer_register(uint32_t cfg, sys_callback_t callback) {
+  timer_callback_table[cfg] = callback;
 }
 /**
  * @fn timer_scan
