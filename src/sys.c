@@ -15,10 +15,6 @@ typedef struct {
   __sys_sensor_callback callback;
   uint8_t msg;
 } __sensor_t;
-typedef struct {
-  uint16_t _100us;
-  sys_callback_t callback;
-} __sys_timed_callback_t;
 /**
  * @struct __sys_t
  * @brief system struct
@@ -28,7 +24,6 @@ typedef struct {
 typedef struct {
   __sensor_t sensor[SENSOR_CNT];
   __sys_schedule schedule[SCHDULE_CNT];
-  __sys_timed_callback_t timed_callback[TIMER_CNT];
 } __sys_t;
 static uint8_t sys_schedule_idx = 0;  //!< system schedule index
 XDATA __sys_t __sys = {{0}, {0}};     //!< system
@@ -80,13 +75,10 @@ void sys_init(uint32_t clk) {
   TMOD = 0x00;  // T0和T1都是工作在模式0下,即16位自动重装载模式
   TH0 = (65535 - __sysclk / 1000) >> 8;
   TL0 = (65535 - __sysclk / 1000) & 0xff;
-  TH1 = (65535 - __sysclk / 10000) >> 8;
-  TL1 = (65535 - __sysclk / 10000) & 0xff;
-  IE |= 0x0A;
+  IE |= 0x02;
   // EA = 1;
   // ET0 = 1;  // T0中断允许
   IP &= ~0x2;
-  IP |= 0x8;
   // PT0 = 0;
 }
 uint32_t __sys_timer_cnt = 0;  //!< system timer count
@@ -112,7 +104,7 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
  */
 void sys_exec(sys_callback_t callback) {
   IE |= 0x80;
-  AUXR |= 0xD5;  // T0，2工作在1T模式，且T2开始计时
+  AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
   TCON |= 0x50;
   // TR1 = 0;  // T1
   // TR0 = 1;  // T0开始计时
@@ -142,27 +134,4 @@ void sys_exec(sys_callback_t callback) {
  */
 void __sys_sensor_set_msg(uint8_t idx, uint8_t msg) {
   __sys.sensor[idx].msg |= msg;
-}
-static uint8_t sys_fgt_idx = 0;  //!< system fine grained timer index
-/**
- * @fn __sys_timer_add
- * @brief add fine grained timer
- * @param _100us
- * @param callback
- * @return none
- */
-void __sys_timer_add(uint16_t _100us, sys_callback_t callback) {
-  __sys.timed_callback[sys_fgt_idx]._100us = _100us;
-  __sys.timed_callback[sys_fgt_idx].callback = callback;
-  ++sys_fgt_idx;
-}
-INTERRUPT_USING(__event_use_timer, TF1_VECTOR, 1) {
-  static uint32_t cnt = 0;
-  uint8_t i = 0;
-  for(; i < sys_fgt_idx; ++i) {
-    if(cnt % __sys.timed_callback[i]._100us == 0) {
-      __sys.timed_callback[i].callback();
-    }
-  }
-  ++cnt;
 }

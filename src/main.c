@@ -15,6 +15,7 @@
 // // #include<mcs51/8052.h>
 // // #include<mcs51/compiler.h>
 #include "adc.h"
+#include "beep.h"
 #include "detail/sys.h"
 #include "display.h"
 #include "hall.h"
@@ -22,6 +23,7 @@
 #include "sys.h"
 #include "timer.h"
 #include "vib.h"
+
 
 #define TEST 0
 
@@ -45,12 +47,14 @@ void sys_set(uint32_t msg) {
 }
 uint8_t led = 1;
 void ok(void) {
-  // ++i;
+  ++i;
   display_led(led);
   if(led == 0x80) {
     led = 1;
+    // beep_on();
   } else {
     led <<= 1;
+    // beep_off();
   }
 }
 #endif
@@ -67,9 +71,10 @@ void main(void) {
   timer_init();
   hall_init();
   vib_init();
+  beep_init();
   display_init();
   display_en(0xff);
-  display_base(DISPLAY_BASE_BIN);
+  // display_base(DISPLAY_BASE_BIN);
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
   sys_register(KEY, addhandler, CONKEY(0, KEYPRESS));
