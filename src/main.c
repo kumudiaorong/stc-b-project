@@ -48,7 +48,7 @@ void sys_set(uint32_t msg) {
 uint8_t led = 1;
 void ok(void) {
   // i = rtc.second;
-  i += 10;
+  // i += 10;
   display_led(led);
   if(led == 0x80) {
     led = 1;

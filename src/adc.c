@@ -7,8 +7,8 @@
 XDATA adc_t adcs = {0};                                                                 //!< adc data
 static XDATA sys_callback_t adc_callback_table[6][2] = {{0}, {0}, {0}, {0}, {0}, {0}};  //!< adc callback table
 static void adc_register(uint32_t cfg, sys_callback_t callback);                        //!< nav register function
-static __sys_msg_t adc_scan(void) REENTRANT;                                                //!< nav scan function
-static void adc_callback(__sys_msg_t msg) REENTRANT;                                        //!< nav callback function
+static __sys_msg_t adc_scan(void) REENTRANT;                                            //!< nav scan function
+static void adc_callback(__sys_msg_t msg) REENTRANT;                                    //!< nav callback function
 uint8_t ADC = 0;                                                                        //!< nav idx
 /**
  * @fn adc_init
@@ -38,7 +38,7 @@ static XDATA uint8_t flag = 0;  //!< adc flag, use bit 0-1 for idx in __adc, use
  */
 static __sys_msg_t adc_scan(void) REENTRANT {
   static uint8_t last = NAVNONE, start = NAVNONE, nav_state = 0;
-  uint8_t cur;
+  uint8_t cur, ret = 0;
   __sys_lock();
   cur = adcs.nav;
   __sys_unlock();
@@ -48,17 +48,17 @@ static __sys_msg_t adc_scan(void) REENTRANT {
   } else if(nav_state != 0) {
     --nav_state;
     if(nav_state == 0) {
+      if(start != last && last != NAVNONE && adc_callback_table[last][NAVRELEASE]) {
+        ret |= (last + 1) << 3;
+        last = NAVNONE;
+      }
       if(start != NAVNONE && adc_callback_table[start][NAVPRESS]) {
         last = start;
-        return start + 1;
-      } else if(start == NAVNONE && last != NAVNONE && adc_callback_table[last][NAVRELEASE]) {
-        start = (last + 1) << 3;
-        last = NAVNONE;
-        return start;
+        ret |= start + 1;
       }
     }
   }
-  return 0;
+  return ret;
 }
 /**
  * @fn adc_callback
