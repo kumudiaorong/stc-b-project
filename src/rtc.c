@@ -100,3 +100,26 @@ void rtc_write(void) {
   write(__RTC_WP, 0x80);
   RTC_RST = 0;
 }
+void rtc_charge(void) {
+  RTC_RST = 1;
+  write(__RTC_WP, 0x00);
+  write(0x90, 0xA9);
+  write(__RTC_WP, 0x80);
+  RTC_RST = 0;
+}
+void nvm_write(uint8_t addr, uint8_t dat) {
+  RTC_RST = 1;
+  write(__RTC_WP, 0x00);
+  write((addr << 1) | 0xC0, dat);
+  write(__RTC_WP, 0x80);
+  RTC_RST = 0;
+}
+uint8_t nvm_read(uint8_t addr) {
+  uint8_t dat = 0;
+  RTC_RST = 1;
+  write(__RTC_WP, 0x00);
+  dat = read((addr << 1) | 0xC1);
+  write(__RTC_WP, 0x80);
+  RTC_RST = 0;
+  return dat;
+}

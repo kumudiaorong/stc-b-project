@@ -49,6 +49,12 @@ uint8_t led = 1;
 void ok(void) {
   // i = rtc.second;
   // i += 10;
+  if(i < 31) {
+    ++i;
+    nvm_write(i % 31, i);
+  } else {
+    i = nvm_read(i % 31 + 1) + 31;
+  }
   display_led(led);
   if(led == 0x80) {
     led = 1;
@@ -78,6 +84,7 @@ void main(void) {
   beep_init();
   display_init();
   rtc_init();
+  rtc_charge();
   display_en(0xff);
   // display_base(DISPLAY_BASE_BIN);
   // timer_handler_set(handler10ms);

@@ -27,4 +27,7 @@ SBIT(RTC_IO, 0xC8, 4);
 void rtc_init(void);
 void rtc_read(void);
 void rtc_write(void);
+void rtc_charge(void);
+void nvm_write(uint8_t addr, uint8_t dat);
+uint8_t nvm_read(uint8_t addr);
 #endif
