@@ -20,10 +20,10 @@
 #include "display.h"
 #include "hall.h"
 #include "key.h"
+#include "rtc.h"
 #include "sys.h"
 #include "timer.h"
 #include "vib.h"
-
 
 #define TEST 0
 
@@ -47,19 +47,23 @@ void sys_set(uint32_t msg) {
 }
 uint8_t led = 1;
 void ok(void) {
-  ++i;
+  // i = rtc.second;
+  i += 10;
   display_led(led);
   if(led == 0x80) {
     led = 1;
+    // i = (uint32_t)rtc.hour * 10000 + rtc.minute * 100 + rtc.second;
     // beep_on();
   } else {
     led <<= 1;
+    // i = (uint32_t)rtc.year * 10000 + rtc.month * 100 + rtc.date;
     // beep_off();
   }
 }
 #endif
 void loop(void) {
   // display_num(i);
+  // rtc_read();
 }
 
 void main(void) {
@@ -73,6 +77,7 @@ void main(void) {
   vib_init();
   beep_init();
   display_init();
+  rtc_init();
   display_en(0xff);
   // display_base(DISPLAY_BASE_BIN);
   // timer_handler_set(handler10ms);

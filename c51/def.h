@@ -74,6 +74,8 @@ SBIT(P3_3, 0xB0, 3);
 SBIT(P3_4, 0xB0, 4);
 SBIT(P3_5, 0xB0, 5);
 
+SFR(P5, 0xC8);
+
 SFR(TL0, 0x8A);
 SFR(TL1, 0x8B);
 SFR(TH0, 0x8C);

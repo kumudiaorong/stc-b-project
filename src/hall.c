@@ -33,7 +33,7 @@ static void hall_register(uint32_t cfg, sys_callback_t callback) {
  * @return msg 1 for hall get close, 2 for hall get away
  */
 static __sys_msg_t hall_scan(void) {
-  static uint8_t hall_state = __HALL_INI;
+  static bit hall_state = __HALL_INI;
   __sys_msg_t ret = 0;
   if(hall_state != __HALL) {
     hall_state = __HALL;

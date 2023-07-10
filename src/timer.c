@@ -60,48 +60,16 @@ static __sys_msg_t timer_scan(void) REENTRANT {
  * @return none
  */
 static void timer_callback(__sys_msg_t msg) REENTRANT {
-  // if(msg & 0x1){
-  //   if(timer_callback_table[0]) {
-  //     timer_callback_table[0]();
-  //   }
-  //   if (msg & 0x2) {
-  //     if(timer_callback_table[1]) {
-  //       timer_callback_table[1]();
-  //     }
-  //     if (msg & 0x4) {
-  //       if(timer_callback_table[2]) {
-  //         timer_callback_table[2]();
-  //       }
-  //       if (msg & 0x8) {
-  //         if(timer_callback_table[3]) {
-  //           timer_callback_table[3]();
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  //   if(timer_callback_table[0] && (msg & 0x1)) {
-  //     timer_callback_table[0]();
-  //   }
-  //   if(timer_callback_table[1] && (msg & 0x2)) {
-  //     timer_callback_table[1]();
-  //   }
-  //   if(timer_callback_table[2] && (msg & 0x4)) {
-  //     timer_callback_table[2]();
-  //   }
-  //   if(timer_callback_table[3] && (msg & 0x8)) {
-  //     timer_callback_table[3]();
-  //   }
-  if((msg & 0x1)) {
+  if(msg & 0x1) {
     timer_callback_table[0]();
   }
-  if((msg & 0x2)) {
+  if(msg & 0x2) {
     timer_callback_table[1]();
   }
-  if((msg & 0x4)) {
+  if(msg & 0x4) {
     timer_callback_table[2]();
   }
-  if((msg & 0x8)) {
+  if(msg & 0x8) {
     timer_callback_table[3]();
   }
 }

@@ -5,6 +5,7 @@
 #define SENSOR_CNT 5
 #define SCHDULE_CNT 1
 #define TIMER_CNT 4
+
 typedef uint8_t __sys_msg_t;
 typedef __sys_msg_t (*__sys_sensor_scan)(void);
 typedef void (*__sys_sensor_register)(uint32_t cfg, sys_callback_t callback);
