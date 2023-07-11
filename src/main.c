@@ -20,11 +20,11 @@
 #include "display.h"
 #include "hall.h"
 #include "key.h"
+#include "nvm.h"
 #include "rtc.h"
 #include "sys.h"
 #include "timer.h"
 #include "vib.h"
-
 #define TEST 0
 
 #if TEST == 0
@@ -49,11 +49,21 @@ uint8_t led = 1;
 void ok(void) {
   // i = rtc.second;
   // i += 10;
-  if(i < 31) {
-    ++i;
-    nvm_write(i % 31, i);
+  // if(i < 31) {
+  //   ++i;
+  //   nvm_write(i % 31, i);
+  // } else {
+  //   i = nvm_read(i % 31 + 1) + 31;
+  // }
+  if(i > 5) {
+    if(i & 1) {
+      i = nvm_read(i >> 1) + 2;
+    } else {
+      nvm_write(i >> 1, i);
+      ++i;
+    }
   } else {
-    i = nvm_read(i % 31 + 1) + 31;
+    ++i;
   }
   display_led(led);
   if(led == 0x80) {
@@ -85,6 +95,7 @@ void main(void) {
   display_init();
   rtc_init();
   rtc_charge();
+  nvm_init();
   display_en(0xff);
   // display_base(DISPLAY_BASE_BIN);
   // timer_handler_set(handler10ms);

@@ -17,14 +17,9 @@ rtc_t rtc = {0};
 static void write_byte(uint8_t dat) {
   uint8_t i = 0;
   RTC_SCLK = 0;
-  NOP();
-  NOP();
   for(; i < 8; i++) {
     RTC_IO = dat & 0x01;
-    NOP();
-    NOP();
     RTC_SCLK = 1;
-    NOP();
     NOP();
     RTC_SCLK = 0;
     dat >>= 1;
@@ -37,10 +32,7 @@ static uint8_t read_byte(void) {
     if(RTC_IO == 1) {
       dat |= 0x80;
     }
-    NOP();
-    NOP();
     RTC_SCLK = 1;
-    NOP();
     NOP();
     RTC_SCLK = 0;
   }
@@ -107,14 +99,14 @@ void rtc_charge(void) {
   write(__RTC_WP, 0x80);
   RTC_RST = 0;
 }
-void nvm_write(uint8_t addr, uint8_t dat) {
+void rtc_nvm_write(uint8_t addr, uint8_t dat) {
   RTC_RST = 1;
   write(__RTC_WP, 0x00);
   write((addr << 1) | 0xC0, dat);
   write(__RTC_WP, 0x80);
   RTC_RST = 0;
 }
-uint8_t nvm_read(uint8_t addr) {
+uint8_t rtc_nvm_read(uint8_t addr) {
   uint8_t dat = 0;
   RTC_RST = 1;
   write(__RTC_WP, 0x00);
