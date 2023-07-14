@@ -17,8 +17,5 @@ enum UartEvent { UARTSENDOVER, UARTRECVOVER, UARTNONE };
 #define CONUART(cfg, event) (cfg << 2 | event)
 void uart_init(void);
 void uart_send(void *buf, uint8_t len);
-uint8_t uart_recv_byte(void);
-uint8_t uart_recv_cfg(void *buf, uint16_t cnt, void *matchHead, uint16_t matchHeadSize);
-uint8_t uart_recv(uint8_t *buf, uint8_t len);
 uint8_t uart_cfg_recv(void *buf, uint16_t cnt);
 #endif

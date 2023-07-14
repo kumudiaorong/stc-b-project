@@ -91,12 +91,6 @@ INTERRUPT_USING(__uart, __UART_VECTOR, 1) {
     }
   }
 }
-void uart_send_byte(uint8_t byte) {
-  while(uart_tx_busy)
-    ;
-  uart_tx_busy = 1;
-  SBUF = byte;
-}
 void uart_send(void *buf, uint8_t len) {
   if(len) {
     send_cfg.buf = buf;
@@ -104,12 +98,4 @@ void uart_send(void *buf, uint8_t len) {
     send_cfg.idx = 1;
     SBUF = send_cfg.buf[0];
   }
-}
-uint8_t uart_recv_byte(void) {
-  uint8_t ret = 0;
-  if(rx_buf_len) {
-    ret = rx_buf[rx_buf_idx - rx_buf_len];
-    rx_buf_len--;
-  }
-  return ret;
 }
