@@ -1,10 +1,6 @@
 #include "nvm.h"
 
 #include "def.h"
-void nvm_init(void) {
-  __NVM_SCL = 1;
-  __NVM_SDA = 1;
-}
 static void start(void) {
   __NVM_SDA = 1;
   NOP();

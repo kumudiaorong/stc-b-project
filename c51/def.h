@@ -107,6 +107,7 @@ SFR(P3M1, 0xB1);
 
 SFR(IE, 0xA8);
 SBIT(EA, 0xA8, 7);
+SBIT(ES, 0xA8, 4);
 SBIT(ET1, 0xA8, 3);
 SBIT(EX1, 0xA8, 2);
 SBIT(ET0, 0xA8, 1);
@@ -114,11 +115,41 @@ SBIT(EX0, 0xA8, 0);
 
 SFR(TMOD, 0x89);
 
+SFR(SCON, 0x98);
+SBIT(SM0, 0x98, 7);
+SBIT(SM1, 0x98, 6);
+SBIT(SM2, 0x98, 5);
+SBIT(REN, 0x98, 4);
+SBIT(TB8, 0x98, 3);
+SBIT(RB8, 0x98, 2);
+SBIT(TI, 0x98, 1);
+SBIT(RI, 0x98, 0);
+
+SFR(SBUF, 0x99);
+
 SFR(TCON, 0x88);
 SBIT(TR1, 0x88, 6);
 SBIT(TR0, 0x88, 4);
 SBIT(IT1, 0x88, 2);
 SBIT(IT0, 0x88, 0);
+
+SFR(P_SW1, 0xA2);  // 0000,0000 外设端口切换寄存器1
+
+SFR(CCON, 0xD8);  // 0000,0000 PCA控制寄存器
+SBIT(CF, 0xD8, 7); //PCA计数器溢出标志
+SBIT(CR, 0xD8, 6); //PCA计数器运行控制位
+SBIT(CCF2, 0xD8, 2);
+SBIT(CCF1, 0xD8, 1);
+SBIT(CCF0, 0xD8, 0);
+
+SFR(CMOD, 0xD9);  // 0000,0000 PCA 工作模式寄存器
+
+// sfr CCAP1H      =   0xFB;   //0000,0000 PCA模块1的捕捉/比较寄存器高字节
+SFR(CCAP1H, 0xFB);  // 0000,0000 PCA模块1的捕捉/比较寄存器高字节
+SFR(CCAP1L, 0xEB);  // 0000,0000 PCA模块1的捕捉/比较寄存器低字节
+
+SFR(CCAPM1, 0xDB);  // 0000,0000 PCA模块1的PWM寄存器
+
 
 SFR(IP, 0xB8);
 SBIT(PPCA, 0xB8, 7);

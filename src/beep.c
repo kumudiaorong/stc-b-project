@@ -1,24 +1,28 @@
 #include "beep.h"
 
+#include "def.h"
 #include "detail/sys.h"
 
+static uint16_t step;
 void beep_init(void) {
   __BEEP_INIT();
+  step = (65536 - __sysclk / 6 / __BEEP_DEFAULT_FREQ);
 }
-static bit beep_state = 0;
 void beep_on(void) {
-  beep_state = 1;
+  CCAPM1 |= 0x01;
+  CCAP1H = step >> 8;
+  CCAP1L = step & 0xff;
 }
 void beep_off(void) {
-  beep_state = 0;
+  CCAPM1 &= ~0x01;
   __BEEP = 0;
 }
-void beep_freq(uint16_t freq) {
-  TH1 = (65535 - __sysclk / 12 / (freq / 2)) >> 8;
-  TL1 = (65535 - __sysclk / 12 / (freq / 2)) & 0xff;
+void beep_freq(uint16_t freq) REENTRANT {
+  step = (65536 - __sysclk / 6 / freq);
 }
 INTERRUPT_USING(__beep, __BEEP_VECTOR, 1) {
-  if(beep_state) {
-    __BEEP = !__BEEP;
-  }
+  __BEEP = !__BEEP;
+  CCAP1L = (((CCAP1H * 256) + CCAP1L) + step) & 0xff;
+  CCAP1H = (((CCAP1H * 256) + CCAP1L) + step) >> 8;
+  CCF1 = 0;
 }

@@ -24,7 +24,9 @@
 #include "rtc.h"
 #include "sys.h"
 #include "timer.h"
+#include "uart.h"
 #include "vib.h"
+
 #define TEST 0
 
 #if TEST == 0
@@ -45,6 +47,16 @@ void sys_test(uint32_t msg) REENTRANT {
 void sys_set(uint32_t msg) {
   i = msg;
 }
+uint8_t buf[8];
+void uart_send_test(void) REENTRANT {
+  static uint8_t arr[1] = {0};
+  uart_send(arr, 1);
+  ++arr[0];
+}
+void uart_recv_test(void) REENTRANT {
+  // i = buf[0];
+  uart_send(buf, 1);
+}
 uint8_t led = 1;
 void ok(void) {
   // i = rtc.second;
@@ -55,16 +67,18 @@ void ok(void) {
   // } else {
   //   i = nvm_read(i % 31 + 1) + 31;
   // }
-  if(i > 5) {
-    if(i & 1) {
-      i = nvm_read(i >> 1) + 2;
-    } else {
-      nvm_write(i >> 1, i);
-      ++i;
-    }
-  } else {
-    ++i;
-  }
+  // if(i > 5) {
+  //   if(i & 1) {
+  //     i = nvm_read(i >> 1) + 2;
+  //   } else {
+  //     nvm_write(i >> 1, i);
+  //     ++i;
+  //   }
+  // } else {
+  // ++i;
+  // send[0] = i;
+  // }
+  // uart_send(send, 1);
   display_led(led);
   if(led == 0x80) {
     led = 1;
@@ -82,6 +96,14 @@ void loop(void) {
   // rtc_read();
 }
 
+void beep_test(void)REENTRANT {
+  static uint16_t freq = 10;
+  beep_freq(freq);
+  freq += 100;
+}
+
+
+
 void main(void) {
   sys_init(27000000);
 #if TEST == 0
@@ -95,12 +117,17 @@ void main(void) {
   display_init();
   rtc_init();
   rtc_charge();
-  nvm_init();
   display_en(0xff);
+  uart_init();
+  // beep_on();
   // display_base(DISPLAY_BASE_BIN);
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
-  sys_register(KEY, addhandler, CONKEY(0, KEYPRESS));
+  // sys_register(UART, uart_send_test, UARTSENDOVER);
+  // uart_cfg_recv(buf, 1);
+  // sys_register(UART, uart_recv_test, UARTRECVOVER);
+  sys_register(KEY, beep_test, CONKEY(0, KEYPRESS));
+  // sys_register(KEY, addhandler, CONKEY(0, KEYPRESS));
   sys_register(KEY, addhandler, CONKEY(0, KEYRELEASE));
   sys_register(KEY, addhandler, CONKEY(1, KEYPRESS));
   sys_register(KEY, addhandler, CONKEY(1, KEYRELEASE));

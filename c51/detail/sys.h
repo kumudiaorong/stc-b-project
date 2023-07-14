@@ -2,7 +2,7 @@
 #define __DETAIL_SYS_H__
 #include "../def.h"
 #include "../sys.h"
-#define SENSOR_CNT 5
+#define SENSOR_CNT 10
 #define SCHDULE_CNT 1
 #define TIMER_CNT 4
 

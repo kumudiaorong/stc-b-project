@@ -103,9 +103,11 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
  * @return none
  */
 void sys_exec(sys_callback_t callback) {
-  IE |= 0x80;
   AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
+  IE |= 0x80;
+  // CMOD |= 0x1;
   TCON |= 0x50;
+  CR = 1;
   // TR1 = 0;  // T1
   // TR0 = 1;  // T0开始计时
   while(1) {
