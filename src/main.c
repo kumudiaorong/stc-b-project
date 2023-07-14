@@ -54,7 +54,7 @@ void uart_send_test(void) REENTRANT {
   ++arr[0];
 }
 void uart_recv_test(void) REENTRANT {
-  // i = buf[0];
+  // ++i;
   uart_send(buf, 1);
 }
 uint8_t led = 1;
@@ -96,13 +96,11 @@ void loop(void) {
   // rtc_read();
 }
 
-void beep_test(void)REENTRANT {
+void beep_test(void) REENTRANT {
   static uint16_t freq = 10;
   beep_freq(freq);
   freq += 100;
 }
-
-
 
 void main(void) {
   sys_init(27000000);
@@ -124,8 +122,8 @@ void main(void) {
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
   // sys_register(UART, uart_send_test, UARTSENDOVER);
-  // uart_cfg_recv(buf, 1);
-  // sys_register(UART, uart_recv_test, UARTRECVOVER);
+  uart_cfg_recv(buf, 1);
+  sys_register(UART, uart_recv_test, UARTRECVOVER);
   sys_register(KEY, beep_test, CONKEY(0, KEYPRESS));
   // sys_register(KEY, addhandler, CONKEY(0, KEYPRESS));
   sys_register(KEY, addhandler, CONKEY(0, KEYRELEASE));

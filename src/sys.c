@@ -103,7 +103,7 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
  * @return none
  */
 void sys_exec(sys_callback_t callback) {
-  AUXR |= 0x95;  // T0，2工作在1T模式，且T2开始计时
+  AUXR |= 0xD4;  // T0，2工作在1T模式，且T2开始计时
   IE |= 0x80;
   // CMOD |= 0x1;
   TCON |= 0x50;

@@ -29,6 +29,7 @@ uint8_t uart_cfg_recv(void *buf, uint16_t cnt) {
   recv_cfg.buf = (uint8_t *)buf;
   recv_cfg.len = cnt;
   recv_cfg.idx = 0;
+  recv_cfg.rx_buf_idx = 0;
   return 0;
 }
 static void uart_register(uint32_t cfg, sys_callback_t callback) {
@@ -49,12 +50,25 @@ static void uart_callback(__sys_msg_t msg) REENTRANT {
       recv_cfg.callback();
       if(recv_cfg.rx_buf_idx != 0) {
         uint8_t i = 0;
-        for(; i < recv_cfg.rx_buf_idx; i++) {
-          recv_cfg.buf[i] = recv_cfg.rx_buf[i];
+        if(recv_cfg.len < recv_cfg.rx_buf_idx) {
+          for(; i < recv_cfg.len; i++) {
+            recv_cfg.buf[i] = recv_cfg.rx_buf[i];
+          }
+          for(; i < recv_cfg.rx_buf_idx; i++) {
+            recv_cfg.rx_buf[i - recv_cfg.len] = recv_cfg.rx_buf[i];
+          }
+          recv_cfg.rx_buf_idx -= recv_cfg.len;
+          recv_cfg.idx = recv_cfg.len;
+        } else {
+          for(; i < recv_cfg.rx_buf_idx; i++) {
+            recv_cfg.buf[i] = recv_cfg.rx_buf[i];
+          }
+          recv_cfg.idx = recv_cfg.rx_buf_idx;
+          recv_cfg.rx_buf_idx = 0;
         }
-        recv_cfg.rx_buf_idx = 0;
+      } else {
+        recv_cfg.idx = 0;
       }
-      recv_cfg.idx = 0;
       break;
     case UARTSENDOVER :
       send_cfg.callback();
@@ -78,6 +92,7 @@ INTERRUPT_USING(__uart, __UART_VECTOR, 1) {
         }
       }
     } else if(rx_buf_idx < __UART_RX_BUF_SIZE) {
+      sys_test(1);
       rx_buf[rx_buf_idx++] = SBUF;
       rx_buf_len++;
     }
