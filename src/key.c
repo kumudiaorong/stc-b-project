@@ -43,16 +43,16 @@ static XDATA uint8_t key_state[__KEY_CNT] = {0};  //!< key state
  * @return none
  */
 #ifdef __KEY_USE_INTERRUPT
-#define __KEY_BY_INT(idx, vec)                                                      \
-  INTERRUPT(__key##idx, vec) {                                                      \
-    static uint32_t lastT = 0;                                                      \
-    if(!lastT || __sys_timer_cnt - lastT > 20) {                                    \
-      if(key_callback_table[idx][(key_states >> idx) & 1]) {                        \
-        __sys_sensor_set_msg(KEY, (__MSG_MASK >> idx) | (key_states & (1 << idx))); \
-      }                                                                             \
-      key_states ^= 1 << idx;                                                       \
-    }                                                                               \
-    lastT = __sys_timer_cnt;                                                        \
+#define __KEY_BY_INT(idx, vec)                                                    \
+  INTERRUPT(__key##idx, vec) {                                                    \
+    static uint32_t lastT = 0;                                                    \
+    if(!lastT || __sys_timer_cnt - lastT > 20) {                                  \
+      if(key_callback_table[idx][(key_states >> idx) & 1]) {                      \
+        __sys.sensor[KEY].msg |= (__MSG_MASK >> idx) | (key_states & (1 << idx)); \
+      }                                                                           \
+      key_states ^= 1 << idx;                                                     \
+    }                                                                             \
+    lastT = __sys_timer_cnt;                                                      \
   }
 __KEY_BY_INT(0, IE0_VECTOR)
 __KEY_BY_INT(1, IE1_VECTOR)

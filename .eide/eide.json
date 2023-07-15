@@ -4,7 +4,8 @@
   "dependenceList": [],
   "srcDirs": [
     "src",
-    "c51"
+    "c51",
+    "iic"
   ],
   "outDir": "build",
   "virtualFolder": {

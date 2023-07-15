@@ -1,16 +1,4 @@
-// /**
-//  * *********************************************
-//  *
-//  * 8051 blink demo
-//  *
-//  * PIN: P11
-//  *
-//  * *********************************************
-// */
 
-// #include <mcs51/8051.h>
-// #include <mcs51/stc12.h>
-// #include<STC/STC12C5A60S2.H>
 #include "def.h"
 // // #include<mcs51/8052.h>
 // // #include<mcs51/compiler.h>
@@ -50,12 +38,12 @@ void sys_set(uint32_t msg) {
 uint8_t buf[8];
 void uart_send_test(void) REENTRANT {
   static uint8_t arr[1] = {0};
-  uart_send(arr, 1);
+  uart_send(arr, 6);
   ++arr[0];
 }
 void uart_recv_test(void) REENTRANT {
   // ++i;
-  uart_send(buf, 1);
+  uart_send(buf, 6);
 }
 uint8_t led = 1;
 void ok(void) {
@@ -67,17 +55,16 @@ void ok(void) {
   // } else {
   //   i = nvm_read(i % 31 + 1) + 31;
   // }
-  // if(i > 5) {
-  //   if(i & 1) {
-  //     i = nvm_read(i >> 1) + 2;
-  //   } else {
-  //     nvm_write(i >> 1, i);
-  //     ++i;
-  //   }
-  // } else {
-  // ++i;
-  // send[0] = i;
-  // }
+  if(i > 5) {
+    if(i & 1) {
+      i = nvm_read(i >> 1) + 2;
+    } else {
+      nvm_write(i >> 1, i);
+      ++i;
+    }
+  } else {
+    ++i;
+  }
   // uart_send(send, 1);
   display_led(led);
   if(led == 0x80) {
@@ -101,7 +88,6 @@ void beep_test(void) REENTRANT {
   beep_freq(freq);
   freq += 100;
 }
-
 void main(void) {
   sys_init(27000000);
 #if TEST == 0
@@ -122,7 +108,7 @@ void main(void) {
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
   // sys_register(UART, uart_send_test, UARTSENDOVER);
-  uart_cfg_recv(buf, 1);
+  uart_cfg_recv(buf, 6);
   sys_register(UART, uart_recv_test, UARTRECVOVER);
   sys_register(KEY, beep_test, CONKEY(0, KEYPRESS));
   // sys_register(KEY, addhandler, CONKEY(0, KEYPRESS));

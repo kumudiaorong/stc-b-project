@@ -2,29 +2,7 @@
 
 #include "detail/sys.h"
 
-/**
- * @struct __sensor_t
- * @brief sensor struct
- * @var __sensor_t::_register register callback function
- * @var __sensor_t::scan scan callback function
- * @var __sensor_t::callback callback function
- */
-typedef struct {
-  __sys_sensor_register _register;
-  __sys_sensor_scan scan;
-  __sys_sensor_callback callback;
-  uint8_t msg;
-} __sensor_t;
-/**
- * @struct __sys_t
- * @brief system struct
- * @var __sys_t::sensor sensor array
- * @var __sys_t::schedule schedule array
- */
-typedef struct {
-  __sensor_t sensor[SENSOR_CNT];
-  __sys_schedule schedule[SCHDULE_CNT];
-} __sys_t;
+
 static uint8_t sys_schedule_idx = 0;  //!< system schedule index
 XDATA __sys_t __sys = {{0}, {0}};     //!< system
 /**
@@ -126,14 +104,4 @@ void sys_exec(sys_callback_t callback) {
       callback();
     }
   }
-}
-/**
- * @fn __sys_sensor_set_msg
- * @brief set sensor msg
- * @param idx
- * @param msg
- * @return none
- */
-void __sys_sensor_set_msg(uint8_t idx, uint8_t msg) {
-  __sys.sensor[idx].msg |= msg;
 }
