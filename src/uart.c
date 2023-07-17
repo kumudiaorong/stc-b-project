@@ -2,6 +2,9 @@
 
 #include "detail/sys.h"
 
+#define __UART1_VECTOR SI0_VECTOR
+#define __UART2_VECTOR S2IO_VECTOR
+
 uint8_t UART;
 typedef struct {
   uint8_t *buf;

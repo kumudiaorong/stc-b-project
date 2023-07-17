@@ -3,6 +3,9 @@
 #include "detail/sys.h"
 #include "sys.h"
 
+#define __HALL P1_2
+#define __HALL_INI 1
+
 uint8_t HALL = 0;
 static XDATA sys_callback_t hall_callback_table[2] = {0};          //!< hall callback table
 static void hall_register(uint32_t cfg, sys_callback_t callback);  //!< hall register function
@@ -14,7 +17,8 @@ static void hall_callback(uint8_t msg);                            //!< hall cal
  * @return none
  */
 void hall_init(void) {
-  __HALL_INIT();
+  P1M0 |= 1 << 2;  //__HALL_INIT()
+  P1M1 &= ~(1 << 2);
   HALL = __sys_sensor_add(hall_register, hall_scan, hall_callback);
 }
 /**

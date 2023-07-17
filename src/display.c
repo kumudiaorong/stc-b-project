@@ -1,21 +1,62 @@
 #include "display.h"
 
 #include "detail/sys.h"
-static void display_schedule(void);//!< display schedule
+
+#define SEG_CONTINUOUS
+#define SEG_SEL_CONTINUOUS
+#define LED_CONTINUOUS
+
+#define __LED_0 P0_0
+#define __LED_1 P0_1
+#define __LED_2 P0_2
+#define __LED_3 P0_3
+#define __LED_4 P0_4
+#define __LED_5 P0_5
+#define __LED_6 P0_6
+#define __LED_7 P0_7
+
+#ifdef LED_CONTINUOUS
+#define __LED P0
+#define __LED_SET(val) __DO_WHILE0(P0 = (val))
+#else
+#endif
+
+#define __SEG_A P0_0
+#define __SEG_B P0_1
+#define __SEG_C P0_2
+#define __SEG_D P0_3
+#define __SEG_E P0_4
+#define __SEG_F P0_5
+#define __SEG_G P0_6
+#define __SEG_H P0_7
+
+#define __SEG_SEL_0 P2_0
+#define __SEG_SEL_1 P2_1
+#define __SEG_SEL_2 P2_2
+
+#ifdef SEG_CONTINUOUS
+#define __SEG_SET(seg) __DO_WHILE0(P0 = (seg))
+#else
+#endif
+
+static void display_schedule(void);  //!< display schedule
 /**
  * @fn display_init
  * @brief display init
  * @return none
  */
 void display_init(void) {
-  __DISPLAY_INIT();
+  P0M0 = 0xff;
+  P0M1 = 0x00;
+  P2M0 |= (1 << 3);
+  P2M1 &= ~(1 << 3);
   __sys_schedule_add(display_schedule);
 }
 static XDATA uint8_t __display_en = 0;  //!< display enable
 /**
  * @fn display_en
  * @brief display enable
- * @param en 
+ * @param en
  * @return none
  */
 void display_en(uint8_t en) {
@@ -26,7 +67,7 @@ static XDATA uint8_t __display_led = 0;  //!< display led
 /**
  * @fn display_led
  * @brief display led
- * @param num 
+ * @param num
  * @return none
  */
 void display_led(uint8_t num) {
@@ -40,7 +81,7 @@ static XDATA uint8_t __display_seg[__SEG_CNT] = {0};  //!< display segment
 /**
  * @fn display_seg
  * @brief display segment
- * @param seg 
+ * @param seg
  * @return none
  */
 void display_seg(uint8_t seg[8]) {
@@ -52,14 +93,14 @@ void display_seg(uint8_t seg[8]) {
 /**
  * @fn display_seg7
  * @brief display segment
- * @param seg1 
- * @param seg2 
- * @param seg3 
- * @param seg4 
- * @param seg5 
- * @param seg6 
- * @param seg7 
- * @param seg8 
+ * @param seg1
+ * @param seg2
+ * @param seg3
+ * @param seg4
+ * @param seg5
+ * @param seg6
+ * @param seg7
+ * @param seg8
  * @return none
  */
 void display_seg7(
@@ -79,7 +120,7 @@ static XDATA enum __display_base __db = DISPLAY_BASE_DEC;  //!< display base
 /**
  * @fn display_base
  * @brief display base
- * @param db 
+ * @param db
  * @return none
  */
 void display_base(enum __display_base db) {
@@ -88,10 +129,10 @@ void display_base(enum __display_base db) {
 /**
  * @fn display_num
  * @brief display number
- * @param num 
+ * @param num
  * @return none
  */
-void display_num(uint32_t num)REENTRANT {
+void display_num(uint32_t num) REENTRANT {
   uint8_t i = 0;
   for(; i < __SEG_CNT; i++) {
     __display_seg[i] = display_num_decoding[num % __db];
@@ -118,16 +159,19 @@ XDATA uint8_t display_num_index[__SEG_CNT] = {0x07, 0x06, 0x05, 0x04, 0x03, 0x02
  */
 static void display_schedule(void) {
   uint8_t i = 0;
-  __SEG_EN();
+  P2_3 = 0;  //__SEG_EN();
   for(; i < __SEG_CNT; ++i) {
     __SEG_SET(0);
-    __SEG_SEL_SET(display_num_index[i]);
+#ifdef SEG_SEL_CONTINUOUS
+    P2 = P2 & 0xf8 | display_num_index[i];
+#else
+#endif
     if(__display_en & (1 << i))
       __SEG_SET(__display_seg[i]);
     delay();
   }
   __LED_SET(0);
-  __LED_EN();
+  P2_3 = 1;  //__LED_EN();
   __LED_SET(__display_led);
   delay();
 }

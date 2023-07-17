@@ -4,11 +4,7 @@
 #define ADC_VECTOR 5
 #define ADC_INT_PRIORITY 1
 #define CFGNAV(key, event) (key << 1 | event)
-#define __ADC_USE_INTERRUPT  //
 
-#ifdef __ADC_USE_INTERRUPT
-SBIT(EADC, 0xA8, 5);
-#endif
 
 /**
  * @brief adc control register
@@ -29,18 +25,7 @@ SFR(ADC_CONTR, 0xBC);  // 0000,0000 A/D×ª»»¿ØÖÆ¼Ä´æÆ÷
 
 SFR(ADC_RES, 0xBD);
 SFR(ADC_RESL, 0xBE);
-#ifdef __ADC_USE_INTERRUPT
-#define __ADC_INIT() __DO_WHILE0(EADC = 1; P1ASF = 0x98)
-#else
-#define __ADC_INIT() __DO_WHILE0(P1ASF = 0x98)
-#endif
-#define __ADC_RT 0x3
-#define __ADC_ROP 0x4
-#define __ADC_NAV 0x7
-#define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0; ADC_CONTR = (0x88 | (channel)))
-// #define __ADC_CLEAR() __DO_WHILE0(ADC_CONTR = ADC_CONTR & ~0x10; ADC_RES = 0; ADC_RESL = 0)
-#define __ADC_GET() ((ADC_RES << 2) + (ADC_RESL >> 6))
-#define __ADC_GET_HIGH() (ADC_RES)
+
 enum AdcChannel {
   ADCRT = 0x3,
   ADCROP = 0x4,

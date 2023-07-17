@@ -3,6 +3,13 @@
 #include "def.h"
 #include "detail/sys.h"
 #include "sys.h"
+/**
+ * @brief use interrupt to detect key
+ *
+ */
+#define __KEY_USE_INTERRUPT  //
+// #define __KEY_USE_POLLING//
+
 #define __MSG_MASK (0x1 << ((sizeof(__sys_msg_t) << 3) - 1))
 uint8_t KEY = 0;
 static XDATA sys_callback_t key_callback_table[__KEY_CNT][2] = {{0}, {0}, {0}};  //!< key callback table
@@ -16,17 +23,15 @@ static void key_callback(uint8_t msg) REENTRANT;  //!< key callback function
  * @return none
  */
 void key_init(void) {
-  __KEY_INIT();
-  KEY = __sys_sensor_add(key_register,
 #ifdef __KEY_USE_INTERRUPT
-    0
+  IE |= 0x5;
+  TCON &= ~0x5;
+  IP |= 0x5;
+  KEY = __sys_sensor_add(key_register, 0, key_callback);
 #endif
 #ifdef __KEY_USE_POLLING
-    key_scan
+  KEY = __sys_sensor_add(key_register, key_scan, key_callback);
 #endif
-    ,
-    key_callback);
-  // __sys_sensor_add(KEY, key_scan, key_register, key_callback);
 }
 /**
  * @fn key_get

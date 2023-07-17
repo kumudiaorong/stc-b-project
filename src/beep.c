@@ -3,9 +3,17 @@
 #include "def.h"
 #include "detail/sys.h"
 
+#define __BEEP_VECTOR 7
+#define __BEEP P3_4
+
 static uint16_t step;
 void beep_init(void) {
-  __BEEP_INIT();
+  CCAPM1 |= 0x48;
+  CMOD |= 0x8;
+  PPCA = 1;
+  P3M0 |= 1 << 4;
+  P3M1 &= ~(1 << 4);
+  __BEEP = 0;
   step = (65536 - __sysclk / 6 / __BEEP_DEFAULT_FREQ);
 }
 void beep_on(void) {

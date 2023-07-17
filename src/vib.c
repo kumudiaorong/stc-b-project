@@ -2,6 +2,8 @@
 
 #include "detail/sys.h"
 #include "sys.h"
+
+#define GET_VIB() (uint8_t)(P2_4 == 0)
 #define __VIB_MASK (0x1 << ((sizeof(__sys_msg_t) << 3) - 1))
 uint8_t VIB = 0;
 static XDATA sys_callback_t vib_callback_table[2] = {0};          //!< vib callback table
@@ -15,7 +17,9 @@ static void vib_callback(uint8_t msg);                            //!< vib callb
  * @return none
  */
 void vib_init(void) {
-  __VIB_INIT();
+  P2M0 &= ~(1 << 4);
+  P2M1 |= 1 << 4;
+  P2_4 = 1;  //__VIB_INIT();
   VIB = __sys_sensor_add(vib_register, vib_scan, vib_callback);
 }
 /**

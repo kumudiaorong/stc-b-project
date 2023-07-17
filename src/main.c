@@ -65,7 +65,7 @@ void ok(void) {
   // } else {
   //   ++i;
   // }
-  uart_send(UARTEXT);
+  // uart_send(UARTEXT);
   // uart_send(UARTUSB);
   // uart_send(send, 1);
   display_led(led);
@@ -105,16 +105,16 @@ void main(void) {
   rtc_charge();
   display_en(0xff);
   uart_init();
-  buf[0] = 0x55;
-  buf[1] = 0x55;
-  buf[5] = 0x55;
+  // buf[0] = 0x55;
+  // buf[1] = 0x55;
+  // buf[5] = 0x55;
   // beep_on();
   // display_base(DISPLAY_BASE_BIN);
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
   // sys_register(UART, uart_send_test, UARTSENDOVER);
   // uart_gen_cfg(CFGUART(UARTUSB, UARTSENDOVER), 9600, buf, 6);
-  uart_gen_cfg(CFGUART(UARTEXT, UARTSENDOVER), 9600, buf, 6);
+  // uart_gen_cfg(CFGUART(UARTEXT, UARTSENDOVER), 9600, buf, 6);
   // sys_register(UART, uart_recv_test, uart_gen_cfg(CFGUART(UARTEXT,UARTRECVOVER), 9600,buf, 6));
   // sys_register(UART, uart_recv_test, uart_gen_cfg(CFGUART(UARTUSB,UARTRECVOVER), 9600,buf, 6));
   sys_register(KEY, beep_test, CFGKEY(0, KEYPRESS));

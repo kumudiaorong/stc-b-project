@@ -2,11 +2,7 @@
 #define __UART_H__
 #include "def.h"
 #include "detail/sys.h"
-#define __UART1_VECTOR SI0_VECTOR
-#define __UART2_VECTOR S2IO_VECTOR
 #define __UART_DEFAULT_BAUDRATE 9600
-#define __UART_RX_BUF_SIZE 8
-#define __UART_CFG_CNT 4
 typedef struct {
   uint8_t *buf;
   uint16_t len;

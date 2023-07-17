@@ -1,9 +1,6 @@
 #ifndef __RTC_H__
 #define __RTC_H__
 #include "def.h"
-// sbit RTC_sclk=P1^5;//时钟控制引脚，控制数据的输入输出
-// sbit RTC_rst=P1^6;//CE引脚，读写时必须置高电平
-// sbit RTC_io=P5^4;//数据引脚
 #define RTC_DEFAULT_YEAR 23
 #define RTC_DEFAULT_DAY 01
 #define RTC_DEFAULT_MONTH 12

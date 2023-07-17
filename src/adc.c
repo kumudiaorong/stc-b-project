@@ -4,6 +4,15 @@
 #include "detail/sys.h"
 #include "sys.h"
 
+#define __ADC_USE_INTERRUPT  //
+
+#ifdef __ADC_USE_INTERRUPT
+SBIT(EADC, 0xA8, 5);
+#endif
+
+#define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0; ADC_CONTR = (0x88 | (channel)))
+#define __ADC_GET() ((ADC_RES << 2) + (ADC_RESL >> 6))
+
 XDATA adc_t adcs = {0};                                                                 //!< adc data
 static XDATA sys_callback_t adc_callback_table[6][2] = {{0}, {0}, {0}, {0}, {0}, {0}};  //!< adc callback table
 static void adc_register(uint32_t cfg, sys_callback_t callback);                        //!< nav register function
@@ -16,7 +25,11 @@ uint8_t ADC = 0;                                                                
  * @return none
  */
 void adc_init(void) {
-  __ADC_INIT();
+#ifdef __ADC_USE_INTERRUPT
+  EADC = 1;
+#else
+#endif
+  P1ASF = 0x98;
   ADC = __sys_sensor_add(adc_register, adc_scan, adc_callback);
   __ADC_START(ADCRT);
 }
