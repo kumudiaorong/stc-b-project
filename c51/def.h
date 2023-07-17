@@ -113,6 +113,8 @@ SBIT(EX1, 0xA8, 2);
 SBIT(ET0, 0xA8, 1);
 SBIT(EX0, 0xA8, 0);
 
+SFR(IE2, 0xAF);  // 0000,0000 中断控制寄存器2
+
 SFR(TMOD, 0x89);
 
 SFR(SCON, 0x98);
@@ -125,7 +127,19 @@ SBIT(RB8, 0x98, 2);
 SBIT(TI, 0x98, 1);
 SBIT(RI, 0x98, 0);
 
+SFR(S2CON, 0x9A);  // 0000,0000 S2控制寄存器
+// SBIT(S2SM0, 0x9A, 7);
+// SBIT(S2SM2, 0x9A, 5);
+// SBIT(S2REN, 0x9A, 4);
+// SBIT(S2TB8, 0x9A, 3);
+// SBIT(S2RB8, 0x9A, 2);
+// SBIT(S2TI, 0x9A, 1);
+// SBIT(S2RI, 0x9A, 0);
+
+
 SFR(SBUF, 0x99);
+
+SFR(S2BUF, 0x9B);  // 0000,0000 S2数据寄存器
 
 SFR(TCON, 0x88);
 SBIT(TR1, 0x88, 6);
@@ -134,6 +148,8 @@ SBIT(IT1, 0x88, 2);
 SBIT(IT0, 0x88, 0);
 
 SFR(P_SW1, 0xA2);  // 0000,0000 外设端口切换寄存器1
+
+SFR(P_SW2, 0xBA);  // 0000,0000 外设端口切换寄存器2
 
 SFR(CCON, 0xD8);  // 0000,0000 PCA控制寄存器
 SBIT(CF, 0xD8, 7); //PCA计数器溢出标志
@@ -160,6 +176,7 @@ SBIT(PX1, 0xB8, 2);
 SBIT(PT0, 0xB8, 1);
 SBIT(PX0, 0xB8, 0);
 
+SFR(IP2, 0xB5);  // 0000,0000 中断优先级寄存器2
 /**
  * @brief Auxiliary Register
  * @note
@@ -181,4 +198,5 @@ SFR(AUXR, 0x8E);  // 0000,0001 辅助寄存器
 #define IE1_VECTOR 2 /* 0x13 external interrupt 1 */
 #define TF1_VECTOR 3 /* 0x1b timer 1 */
 #define SI0_VECTOR 4 /* 0x23 serial port 0 */
+#define S2IO_VECTOR 8 /* 0x43 serial port 2 */
 #endif               // !__DEF_H__

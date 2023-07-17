@@ -5,7 +5,8 @@
   "srcDirs": [
     "src",
     "c51",
-    "iic"
+    "iic",
+    "oled/src"
   ],
   "outDir": "build",
   "virtualFolder": {
@@ -34,7 +35,9 @@
       "uploadConfigMap": {},
       "custom_dep": {
         "name": "default",
-        "incList": [],
+        "incList": [
+          "oled/inc"
+        ],
         "libList": [],
         "sourceDirList": [],
         "defineList": []

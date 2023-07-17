@@ -38,12 +38,12 @@ void sys_set(uint32_t msg) {
 uint8_t buf[8];
 void uart_send_test(void) REENTRANT {
   static uint8_t arr[1] = {0};
-  uart_send(arr, 6);
   ++arr[0];
 }
 void uart_recv_test(void) REENTRANT {
   // ++i;
-  uart_send(buf, 6);
+  // uart_send(UARTUSB);
+  // uart_send(UARTEXT);
 }
 uint8_t led = 1;
 void ok(void) {
@@ -55,16 +55,18 @@ void ok(void) {
   // } else {
   //   i = nvm_read(i % 31 + 1) + 31;
   // }
-  if(i > 5) {
-    if(i & 1) {
-      i = nvm_read(i >> 1) + 2;
-    } else {
-      nvm_write(i >> 1, i);
-      ++i;
-    }
-  } else {
-    ++i;
-  }
+  // if(i > 5) {
+  //   if(i & 1) {
+  //     i = nvm_read(i >> 1) + 2;
+  //   } else {
+  //     nvm_write(i >> 1, i);
+  //     ++i;
+  //   }
+  // } else {
+  //   ++i;
+  // }
+  uart_send(UARTEXT);
+  // uart_send(UARTUSB);
   // uart_send(send, 1);
   display_led(led);
   if(led == 0x80) {
@@ -103,34 +105,39 @@ void main(void) {
   rtc_charge();
   display_en(0xff);
   uart_init();
+  buf[0] = 0x55;
+  buf[1] = 0x55;
+  buf[5] = 0x55;
   // beep_on();
   // display_base(DISPLAY_BASE_BIN);
   // timer_handler_set(handler10ms);
   // display_base(DISPLAY_BASE_HEX);
   // sys_register(UART, uart_send_test, UARTSENDOVER);
-  uart_cfg_recv(buf, 6);
-  sys_register(UART, uart_recv_test, UARTRECVOVER);
-  sys_register(KEY, beep_test, CONKEY(0, KEYPRESS));
-  // sys_register(KEY, addhandler, CONKEY(0, KEYPRESS));
-  sys_register(KEY, addhandler, CONKEY(0, KEYRELEASE));
-  sys_register(KEY, addhandler, CONKEY(1, KEYPRESS));
-  sys_register(KEY, addhandler, CONKEY(1, KEYRELEASE));
+  // uart_gen_cfg(CFGUART(UARTUSB, UARTSENDOVER), 9600, buf, 6);
+  uart_gen_cfg(CFGUART(UARTEXT, UARTSENDOVER), 9600, buf, 6);
+  // sys_register(UART, uart_recv_test, uart_gen_cfg(CFGUART(UARTEXT,UARTRECVOVER), 9600,buf, 6));
+  // sys_register(UART, uart_recv_test, uart_gen_cfg(CFGUART(UARTUSB,UARTRECVOVER), 9600,buf, 6));
+  sys_register(KEY, beep_test, CFGKEY(0, KEYPRESS));
+  // sys_register(KEY, addhandler, CFGKEY(0, KEYPRESS));
+  sys_register(KEY, addhandler, CFGKEY(0, KEYRELEASE));
+  sys_register(KEY, addhandler, CFGKEY(1, KEYPRESS));
+  sys_register(KEY, addhandler, CFGKEY(1, KEYRELEASE));
   sys_register(TIMER, update, TIMER10MS);
   sys_register(TIMER, ok, TIMER1S);
   sys_register(HALL, addhandler, HALLGETCLOSE);
   sys_register(HALL, addhandler, HALLGETAWAY);
-  sys_register(ADC, addhandler, CONNAV(NAVUP, NAVPRESS));
-  sys_register(ADC, addhandler, CONNAV(NAVUP, NAVRELEASE));
-  sys_register(ADC, addhandler, CONNAV(NAVDOWN, NAVPRESS));
-  sys_register(ADC, addhandler, CONNAV(NAVDOWN, NAVRELEASE));
-  sys_register(ADC, addhandler, CONNAV(NAVLEFT, NAVPRESS));
-  sys_register(ADC, addhandler, CONNAV(NAVLEFT, NAVRELEASE));
-  sys_register(ADC, addhandler, CONNAV(NAVRIGHT, NAVPRESS));
-  sys_register(ADC, addhandler, CONNAV(NAVRIGHT, NAVRELEASE));
-  sys_register(ADC, addhandler, CONNAV(NAVCENTER, NAVPRESS));
-  sys_register(ADC, addhandler, CONNAV(NAVCENTER, NAVRELEASE));
-  sys_register(ADC, addhandler, CONNAV(NAVKEY3, NAVPRESS));
-  sys_register(ADC, addhandler, CONNAV(NAVKEY3, NAVRELEASE));
+  sys_register(ADC, addhandler, CFGNAV(NAVUP, NAVPRESS));
+  sys_register(ADC, addhandler, CFGNAV(NAVUP, NAVRELEASE));
+  sys_register(ADC, addhandler, CFGNAV(NAVDOWN, NAVPRESS));
+  sys_register(ADC, addhandler, CFGNAV(NAVDOWN, NAVRELEASE));
+  sys_register(ADC, addhandler, CFGNAV(NAVLEFT, NAVPRESS));
+  sys_register(ADC, addhandler, CFGNAV(NAVLEFT, NAVRELEASE));
+  sys_register(ADC, addhandler, CFGNAV(NAVRIGHT, NAVPRESS));
+  sys_register(ADC, addhandler, CFGNAV(NAVRIGHT, NAVRELEASE));
+  sys_register(ADC, addhandler, CFGNAV(NAVCENTER, NAVPRESS));
+  sys_register(ADC, addhandler, CFGNAV(NAVCENTER, NAVRELEASE));
+  sys_register(ADC, addhandler, CFGNAV(NAVKEY3, NAVPRESS));
+  sys_register(ADC, addhandler, CFGNAV(NAVKEY3, NAVRELEASE));
   sys_register(VIB, addhandler, VIBSTART);
   sys_register(VIB, addhandler, VIBSTOP);
 #elif TEST == 1

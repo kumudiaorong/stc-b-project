@@ -50,11 +50,10 @@ uint32_t __sysclk = 0;  //!< system clock
  */
 void sys_init(uint32_t clk) {
   __sysclk = clk;
-  TMOD = 0x00;  // T0和T1都是工作在模式0下,即16位自动重装载模式
+  TMOD &= 0xf0;  // T0和T1都是工作在模式0下,即16位自动重装载模式
   TH0 = (65535 - __sysclk / 1000) >> 8;
   TL0 = (65535 - __sysclk / 1000) & 0xff;
   IE |= 0x02;
-  // EA = 1;
   // ET0 = 1;  // T0中断允许
   IP &= ~0x2;
   // PT0 = 0;
@@ -81,8 +80,9 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
  * @return none
  */
 void sys_exec(sys_callback_t callback) {
-  AUXR |= 0xD4;  // T0，2工作在1T模式，且T2开始计时
+  AUXR |= 0x90;  // T0，2工作在1T模式，且T2开始计时
   IE |= 0x80;
+  // EA = 1;
   // CMOD |= 0x1;
   TCON |= 0x50;
   CR = 1;

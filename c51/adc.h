@@ -3,7 +3,7 @@
 #include "def.h"
 #define ADC_VECTOR 5
 #define ADC_INT_PRIORITY 1
-#define CONNAV(key, event) (key << 1 | event)
+#define CFGNAV(key, event) (key << 1 | event)
 #define __ADC_USE_INTERRUPT  //
 
 #ifdef __ADC_USE_INTERRUPT
