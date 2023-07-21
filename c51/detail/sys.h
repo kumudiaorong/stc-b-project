@@ -33,7 +33,6 @@ typedef struct {
  */
 typedef struct {
   __sensor_t sensor[SENSOR_CNT];
-  __sys_schedule schedule[SCHDULE_CNT];
 } __sys_t;
 
 extern XDATA __sys_t __sys;     //!< system

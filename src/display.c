@@ -39,7 +39,7 @@
 #else
 #endif
 
-static void display_schedule(void);  //!< display schedule
+static __sys_msg_t display_scan(void) ;
 /**
  * @fn display_init
  * @brief display init
@@ -50,9 +50,9 @@ void display_init(void) {
   P0M1 = 0x00;
   P2M0 |= (1 << 3);
   P2M1 &= ~(1 << 3);
-  __sys_schedule_add(display_schedule);
+  __sys_sensor_add(0, display_scan, 0);
 }
-static XDATA uint8_t __display_en = 0;  //!< display enable
+static XDATA uint8_t __display_en = 0xff;  //!< display enable
 /**
  * @fn display_en
  * @brief display enable
@@ -153,25 +153,26 @@ XDATA uint8_t display_num_decoding[16] = {
   0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71};  //!< decoding table
 XDATA uint8_t display_num_index[__SEG_CNT] = {0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};      //!< index table
 /**
- * @fn display_schedule
- * @brief display schedule
- * @return none
+ * @fn display_scan
+ * @brief display scan
+ * @return 0
  */
-static void display_schedule(void) {
-  uint8_t i = 0;
-  P2_3 = 0;  //__SEG_EN();
-  for(; i < __SEG_CNT; ++i) {
+static __sys_msg_t display_scan(void) {
+  static uint8_t idx = 0;
+  if(idx == __SEG_CNT) {
+    __LED_SET(0);
+    P2_3 = 1;  //__LED_EN();
+    __LED_SET(__display_led);
+    idx = 0xff;
+  } else if(__display_en & (1 << idx)) {
+    P2_3 = 0;  //__SEG_EN();
     __SEG_SET(0);
 #ifdef SEG_SEL_CONTINUOUS
-    P2 = P2 & 0xf8 | display_num_index[i];
+    P2 = P2 & 0xf8 | display_num_index[idx];
 #else
 #endif
-    if(__display_en & (1 << i))
-      __SEG_SET(__display_seg[i]);
-    delay();
+    __SEG_SET(__display_seg[idx]);
   }
-  __LED_SET(0);
-  P2_3 = 1;  //__LED_EN();
-  __LED_SET(__display_led);
-  delay();
+  ++idx;
+  return 0;
 }

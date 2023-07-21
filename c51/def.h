@@ -12,8 +12,7 @@
 #define INTERRUPT(name, vector) void name(void) interrupt vector
 #define INTERRUPT_USING(name, vector, regnum) void name(void) interrupt vector using regnum
 
-extern void _nop_(void);
-#define NOP() _nop_()
+void NOP(void)REENTRANT;
 
 #elif defined(__SDCC) || defined(SDCC)
 #define XDATA __xdata
@@ -28,9 +27,11 @@ extern void _nop_(void);
 #endif
 
 #define __DO_WHILE0(x) \
-  do {                \
-    x;                \
+  do {                 \
+    x;                 \
   } while(0)
+
+#define __ASSERT_RETURN(cond, ret) __DO_WHILE0(if(!(cond)) return ret)
 // #define xdata __xdata
 // #define reentrant __reentrant
 // #include"mcs51/compiler.h"
@@ -80,10 +81,8 @@ SBIT(P4_0, 0xC0, 0);
 SFR(P5, 0xC8);
 SBIT(P5_5, 0xC8, 5);
 
-
 SFR(PSW, 0xD0);
 SBIT(CY, 0xD0, 7);
-
 
 SFR(TL0, 0x8A);
 SFR(TL1, 0x8B);
@@ -136,7 +135,6 @@ SFR(S2CON, 0x9A);  // 0000,0000 S2控制寄存器
 // SBIT(S2TI, 0x9A, 1);
 // SBIT(S2RI, 0x9A, 0);
 
-
 SFR(SBUF, 0x99);
 
 SFR(S2BUF, 0x9B);  // 0000,0000 S2数据寄存器
@@ -151,9 +149,9 @@ SFR(P_SW1, 0xA2);  // 0000,0000 外设端口切换寄存器1
 
 SFR(P_SW2, 0xBA);  // 0000,0000 外设端口切换寄存器2
 
-SFR(CCON, 0xD8);  // 0000,0000 PCA控制寄存器
-SBIT(CF, 0xD8, 7); //PCA计数器溢出标志
-SBIT(CR, 0xD8, 6); //PCA计数器运行控制位
+SFR(CCON, 0xD8);    // 0000,0000 PCA控制寄存器
+SBIT(CF, 0xD8, 7);  // PCA计数器溢出标志
+SBIT(CR, 0xD8, 6);  // PCA计数器运行控制位
 SBIT(CCF2, 0xD8, 2);
 SBIT(CCF1, 0xD8, 1);
 SBIT(CCF0, 0xD8, 0);
@@ -164,7 +162,6 @@ SFR(CCAP1H, 0xFB);  // 0000,0000 PCA模块1的捕捉/比较寄存器高字节
 SFR(CCAP1L, 0xEB);  // 0000,0000 PCA模块1的捕捉/比较寄存器低字节
 
 SFR(CCAPM1, 0xDB);  // 0000,0000 PCA模块1的PWM寄存器
-
 
 SFR(IP, 0xB8);
 SBIT(PPCA, 0xB8, 7);
@@ -193,10 +190,10 @@ SFR(IP2, 0xB5);  // 0000,0000 中断优先级寄存器2
  */
 SFR(AUXR, 0x8E);  // 0000,0001 辅助寄存器
 
-#define IE0_VECTOR 0 /* 0x03 external interrupt 0 */
-#define TF0_VECTOR 1 /* 0x0b timer 0 */
-#define IE1_VECTOR 2 /* 0x13 external interrupt 1 */
-#define TF1_VECTOR 3 /* 0x1b timer 1 */
-#define SI0_VECTOR 4 /* 0x23 serial port 0 */
+#define IE0_VECTOR 0  /* 0x03 external interrupt 0 */
+#define TF0_VECTOR 1  /* 0x0b timer 0 */
+#define IE1_VECTOR 2  /* 0x13 external interrupt 1 */
+#define TF1_VECTOR 3  /* 0x1b timer 1 */
+#define SI0_VECTOR 4  /* 0x23 serial port 0 */
 #define S2IO_VECTOR 8 /* 0x43 serial port 2 */
-#endif               // !__DEF_H__
+#endif                // !__DEF_H__

@@ -1,19 +1,12 @@
 #include "sys.h"
 
 #include "detail/sys.h"
-
-
-static uint8_t sys_schedule_idx = 0;  //!< system schedule index
-XDATA __sys_t __sys = {{0}, {0}};     //!< system
-/**
- * @fn __sys_schedule_add
- * @brief add schedule
- * @param schedule
- * @return none
- */
-void __sys_schedule_add(__sys_schedule schedule) {
-  __sys.schedule[sys_schedule_idx++] = schedule;
+void NOP(void) REENTRANT {
+  uint8_t i = 1;
+  while(i--)
+    ;
 }
+XDATA __sys_t __sys = {0};          //!< system
 static uint8_t sys_sensor_idx = 0;  //!< system sensor index
 /**
  * @fn __sys_sensor_add
@@ -67,7 +60,7 @@ uint32_t __sys_timer_cnt = 0;  //!< system timer count
 INTERRUPT(__sys_use_timer, TF0_VECTOR) {
   uint8_t i = 0;
   for(; i < sys_sensor_idx; ++i) {
-    if(__sys.sensor[i].scan && !__sys.sensor[i].msg) {
+    if(__sys.sensor[i].scan) {
       __sys.sensor[i].msg |= __sys.sensor[i].scan();
     }
   }
@@ -90,16 +83,12 @@ void sys_exec(sys_callback_t callback) {
   // TR0 = 1;  // T0开始计时
   while(1) {
     uint8_t i = 0;
-    for(; i < SENSOR_CNT; ++i) {
+    for(i = 0; i < SENSOR_CNT; ++i) {
       if(__sys.sensor[i].callback && __sys.sensor[i].msg) {
         __sys.sensor[i].callback(__sys.sensor[i].msg);
         __sys.sensor[i].msg = 0;
       }
     }
-    for(i = 0; i < SCHDULE_CNT; ++i)
-      if(__sys.schedule[i]) {
-        __sys.schedule[i]();
-      }
     if(callback) {
       callback();
     }

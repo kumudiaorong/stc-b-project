@@ -2,6 +2,7 @@
 #define __SYS_H__
 #include "def.h"
 typedef void (*sys_callback_t)(void);
+extern uint32_t __sys_timer_cnt;
 
 #define CFGEVENT(sys, dri) ((sys << 4) | dri)
 void sys_init(uint32_t sysclk);
