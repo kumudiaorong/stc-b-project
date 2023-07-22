@@ -4,14 +4,10 @@
 #include "detail/sys.h"
 #include "sys.h"
 
-#define __ADC_USE_INTERRUPT  //
-
-#ifdef __ADC_USE_INTERRUPT
 SBIT(EADC, 0xA8, 5);
-#endif
 
-#define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0; ADC_CONTR = (0x88 | (channel)))
-#define __ADC_GET() ((ADC_RES << 2) + (ADC_RESL >> 6))
+#define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0; ADC_CONTR = (0x88 | (channel)))  //!< adc start
+#define ADC_INT_PRIORITY 1
 
 XDATA adc_t adcs = {0};                                                                 //!< adc data
 static XDATA sys_callback_t adc_callback_table[6][2] = {{0}, {0}, {0}, {0}, {0}, {0}};  //!< adc callback table
@@ -25,11 +21,8 @@ uint8_t ADC = 0;                                                                
  * @return none
  */
 void adc_init(void) {
-#ifdef __ADC_USE_INTERRUPT
-  EADC = 1;
-#else
-#endif
-  P1ASF = 0x98;
+  EADC = 1;//!< enable adc interrupt
+  P1ASF = 0x98;//!< select port 1.3 , 1.4 and 1.7 as adc
   ADC = __sys_sensor_add(adc_register, adc_scan, adc_callback);
   __ADC_START(ADCRT);
 }
@@ -52,9 +45,7 @@ static XDATA uint8_t flag = 0;  //!< adc flag, use bit 0-1 for idx in __adc, use
 static __sys_msg_t adc_scan(void) REENTRANT {
   static uint8_t last = NAVNONE, start = NAVNONE, nav_state = 0;
   uint8_t cur, ret = 0;
-  __sys_lock();
   cur = adcs.nav;
-  __sys_unlock();
   if(cur != start) {
     start = cur;
     nav_state = 10;
@@ -107,7 +98,7 @@ INTERRUPT_USING(__adc, ADC_VECTOR, ADC_INT_PRIORITY) {
   static XDATA uint32_t sum = 0;
   static XDATA uint16_t count = 0, avgCnt = 50;
   uint8_t idx = flag & 0x3;
-  sum += __ADC_GET();
+  sum += ((ADC_RES << 2) + (ADC_RESL >> 6));
   ++count;
   if(count == avgCnt) {
     if(idx == 0x2) {

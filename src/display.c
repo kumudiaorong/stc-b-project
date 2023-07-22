@@ -76,7 +76,7 @@ void display_led(uint8_t num) {
 #else
 #endif
 
-static XDATA uint8_t __display_seg[__SEG_CNT] = {0};  //!< display segment
+static XDATA uint8_t __display_seg[8] = {0};  //!< display segment
 #ifdef SEG_CONTINUOUS
 /**
  * @fn display_seg
@@ -86,7 +86,7 @@ static XDATA uint8_t __display_seg[__SEG_CNT] = {0};  //!< display segment
  */
 void display_seg(uint8_t seg[8]) {
   uint8_t i = 0;
-  for(; i < __SEG_CNT; ++i) {
+  for(; i < 8; ++i) {
     __display_seg[i] = seg[i];
   }
 }
@@ -134,7 +134,7 @@ void display_base(enum __display_base db) {
  */
 void display_num(uint32_t num) REENTRANT {
   uint8_t i = 0;
-  for(; i < __SEG_CNT; i++) {
+  for(; i < 8; i++) {
     __display_seg[i] = display_num_decoding[num % __db];
     num /= __db;
   }
@@ -151,7 +151,7 @@ static void delay(void) {
 }
 XDATA uint8_t display_num_decoding[16] = {
   0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71};  //!< decoding table
-XDATA uint8_t display_num_index[__SEG_CNT] = {0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};      //!< index table
+XDATA uint8_t display_num_index[8] = {0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};      //!< index table
 /**
  * @fn display_scan
  * @brief display scan
@@ -159,7 +159,7 @@ XDATA uint8_t display_num_index[__SEG_CNT] = {0x07, 0x06, 0x05, 0x04, 0x03, 0x02
  */
 static __sys_msg_t display_scan(void) {
   static uint8_t idx = 0;
-  if(idx == __SEG_CNT) {
+  if(idx == 8) {
     __LED_SET(0);
     P2_3 = 1;  //__LED_EN();
     __LED_SET(__display_led);

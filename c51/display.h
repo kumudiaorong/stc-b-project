@@ -2,11 +2,10 @@
 #define __DISPLAY_H__
 
 #include "def.h"
-#define __SEG_CNT 8
 
 
 extern XDATA uint8_t display_num_decoding[16];
-extern XDATA uint8_t display_num_index[__SEG_CNT];
+extern XDATA uint8_t display_num_index[8];
 /**
  * @brief initialize led
  *

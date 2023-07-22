@@ -3,6 +3,13 @@
 #include "def.h"
 #include "detail/sys.h"
 #include "sys.h"
+
+
+#define __KEY_1 P3_2
+#define __KEY_2 P3_3
+#define __KEY_3 P1_7
+#define __KEY_CNT 3
+
 /**
  * @brief use interrupt to detect key
  *
@@ -10,7 +17,6 @@
 #define __KEY_USE_INTERRUPT  //
 // #define __KEY_USE_POLLING//
 
-#define __MSG_MASK (0x1 << ((sizeof(__sys_msg_t) << 3) - 1))
 uint8_t KEY = 0;
 static XDATA sys_callback_t key_callback_table[__KEY_CNT][2] = {{0}, {0}, {0}};  //!< key callback table
 static XDATA uint8_t key_states = 0;  //!< key states,bit 0-2 for key1-3, 1 for press, 0 for release

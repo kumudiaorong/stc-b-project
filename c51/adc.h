@@ -2,7 +2,6 @@
 #define __ADC_H__
 #include "def.h"
 #define ADC_VECTOR 5
-#define ADC_INT_PRIORITY 1
 #define CFGNAV(key, event) (key << 1 | event)
 
 

@@ -3,7 +3,6 @@
 #include "detail/sys.h"
 #include "sys.h"
 
-#define __VIB_MASK (0x1 << ((sizeof(__sys_msg_t) << 3) - 1))
 uint8_t VIB = 0;
 static XDATA sys_callback_t vib_callback_table[2] = {0};          //!< vib callback table
 static XDATA uint8_t vib_state = 0;                               //!< vib state
@@ -40,13 +39,13 @@ static __sys_msg_t vib_scan(void) {
   __sys_msg_t ret = 0;
   if(P2_4 == 0) {  // GET_VIB()
     if(vib_state == 0 && vib_callback_table[0]) {
-      ret |= VIBSTART | __VIB_MASK;
+      ret |= VIBSTART | __MSG_MASK;
     }
     vib_state = 20;
   } else if(vib_state != 0) {
     --vib_state;
     if(vib_state == 0 && vib_callback_table[1]) {
-      ret |= VIBSTOP | __VIB_MASK;
+      ret |= VIBSTOP | __MSG_MASK;
     }
   }
   return ret;
@@ -58,5 +57,5 @@ static __sys_msg_t vib_scan(void) {
  * @return none
  */
 static void vib_callback(__sys_msg_t msg) {
-  vib_callback_table[msg & ~__VIB_MASK]();
+  vib_callback_table[msg & ~__MSG_MASK]();
 }

@@ -42,7 +42,7 @@ static __sys_msg_t hall_scan(void) {
   if(hall_state != __HALL) {
     hall_state = __HALL;
     if(hall_callback_table[hall_state]) {
-      ret |= hall_state | 0x80;
+      ret |= hall_state | __MSG_MASK;
     }
   }
   return ret;
@@ -54,5 +54,5 @@ static __sys_msg_t hall_scan(void) {
  * @return none
  */
 static void hall_callback(__sys_msg_t msg) {
-  hall_callback_table[msg & 0x7f]();
+  hall_callback_table[msg & (~__MSG_MASK)]();
 }
