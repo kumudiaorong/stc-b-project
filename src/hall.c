@@ -3,6 +3,10 @@
 #include "detail/sys.h"
 #include "sys.h"
 
+#define __HALL_INI 1
+
+#define __HALL_INIT() __DO_WHILE0(P1M1 &= ~(1 << 2); P1M0 |= 1 << 2)
+
 uint8_t HALL = 0;
 static XDATA sys_callback_t hall_callback_table[2] = {0};          //!< hall callback table
 static void hall_register(uint32_t cfg, sys_callback_t callback);  //!< hall register function

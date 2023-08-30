@@ -78,9 +78,20 @@ static void uart_callback(__sys_msg_t msg) REENTRANT {
   }
 }
 void uart_init(void) {
-  __UART_INIT();
+  AUXR &= ~0x1;//select timer1 as baudrate generator
+  AUXR |= 0x44;//timer1 divide by 12,timer2 divide by 12
+  PS = 1;//interrupt priority 1
+  SCON |= 0x50;//SM0 = 1, SM1 = 0, REN = 1 ,8-bit UART, variable baudrate, receive enable
+  TH1 = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) >> 8;
+  TL1 = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) & 0xFF;//set baudrate
+  RI = 0;//clear receive interrupt flag
+  TI = 0;//clear transmit interrupt flag
+  ES = 1;//enable serial interrupt
+  TCON |= 0x40;//timer1 run
+  AUXR |= 0x10;//timer2 run
   UART = __sys_sensor_add(uart_register, 0, uart_callback);
 }
+  
 INTERRUPT_USING(__uart, __UART_VECTOR, 1) {
   while(RI) {
     RI = 0;
@@ -92,7 +103,6 @@ INTERRUPT_USING(__uart, __UART_VECTOR, 1) {
         }
       }
     } else if(rx_buf_idx < __UART_RX_BUF_SIZE) {
-      sys_test(1);
       rx_buf[rx_buf_idx++] = SBUF;
       rx_buf_len++;
     }

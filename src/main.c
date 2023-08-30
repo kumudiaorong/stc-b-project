@@ -1,19 +1,6 @@
-// /**
-//  * *********************************************
-//  *
-//  * 8051 blink demo
-//  *
-//  * PIN: P11
-//  *
-//  * *********************************************
-// */
-
-// #include <mcs51/8051.h>
-// #include <mcs51/stc12.h>
-// #include<STC/STC12C5A60S2.H>
+#define TEST 1
+#if TEST == 0
 #include "def.h"
-// // #include<mcs51/8052.h>
-// // #include<mcs51/compiler.h>
 #include "adc.h"
 #include "beep.h"
 #include "detail/sys.h"
@@ -23,13 +10,9 @@
 #include "nvm.h"
 #include "rtc.h"
 #include "sys.h"
-#include "timer.h"
 #include "uart.h"
+#include "timer.h"
 #include "vib.h"
-
-#define TEST 0
-
-#if TEST == 0
 uint32_t i = 0;
 void update(void) {
   // i = adc.rop;
@@ -59,41 +42,12 @@ void uart_recv_test(void) REENTRANT {
 }
 uint8_t led = 1;
 void ok(void) {
-  // i = rtc.second;
-  // i += 10;
-  // if(i < 31) {
-  //   ++i;
-  //   nvm_write(i % 31, i);
-  // } else {
-  //   i = nvm_read(i % 31 + 1) + 31;
-  // }
-  // if(i > 5) {
-  //   if(i & 1) {
-  //     i = nvm_read(i >> 1) + 2;
-  //   } else {
-  //     nvm_write(i >> 1, i);
-  //     ++i;
-  //   }
-  // } else {
-  // ++i;
-  // send[0] = i;
-  // }
-  // uart_send(send, 1);
   display_led(led);
   if(led == 0x80) {
     led = 1;
-    // i = (uint32_t)rtc.hour * 10000 + rtc.minute * 100 + rtc.second;
-    // beep_on();
   } else {
     led <<= 1;
-    // i = (uint32_t)rtc.year * 10000 + rtc.month * 100 + rtc.date;
-    // beep_off();
   }
-}
-#endif
-void loop(void) {
-  // display_num(i);
-  // rtc_read();
 }
 
 void beep_test(void) REENTRANT {
@@ -102,6 +56,16 @@ void beep_test(void) REENTRANT {
   freq += 100;
 }
 
+#elif TEST == 1
+#include "sys.h"
+#include "uart.h"
+unsigned char buf[9];
+void uart_recv_test(void) {
+  uart_send(buf, 8);
+}
+#endif
+void loop(void) {
+}
 void main(void) {
   sys_init(27000000);
 #if TEST == 0
@@ -148,21 +112,9 @@ void main(void) {
   sys_register(VIB, addhandler, VIBSTART);
   sys_register(VIB, addhandler, VIBSTOP);
 #elif TEST == 1
-  display_init();
-  display_num_decoding[3] = 0x76;
-  display_num_decoding[4] = 0x38;
-  display_num_decoding[5] = 0x40;
-  display_en(0xfe);
-  display_seg7(0, display_num_decoding[1], display_num_decoding[2], 0x40, 0x38, 0x76, display_num_decoding[2],
-    display_num_decoding[1]);
-#elif TEST == 2
-  display_init();
-  display_num_decoding[3] = 0x76;
-  display_num_decoding[4] = 0x38;
-  display_num_decoding[5] = 0x40;
-  display_en(0xfe);
-  display_seg7(0, display_num_decoding[1], display_num_decoding[2], 0x40, 0x38, 0x76, display_num_decoding[2],
-    display_num_decoding[1]);
+  uart_init();
+  uart_cfg_recv(buf, 8);
+  sys_register(UART, uart_recv_test, UARTRECVOVER);
 #endif
   sys_exec(loop);
 }

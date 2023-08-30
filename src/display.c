@@ -1,6 +1,20 @@
 #include "display.h"
 
 #include "detail/sys.h"
+
+
+#define __DISPLAY_INIT() __DO_WHILE0(P0M0 = 0xff; P0M1 = 0x00; P2M0 |=(1<<3); P2M1 &= ~(1<<3))
+
+#define __LED_EN() __DO_WHILE0(P2_3 = 1)
+
+#define __LED_SET(val) __DO_WHILE0(P0 = (val))
+
+#define __SEG_EN() __DO_WHILE0(P2_3 = 0)
+
+#define __SEG_SET(seg) __DO_WHILE0(P0 = (seg))
+
+#define __SEG_SEL_SET(sel) __DO_WHILE0(P2 = P2 & 0xf8 | (sel))
+
 static void display_schedule(void);//!< display schedule
 /**
  * @fn display_init
@@ -21,7 +35,6 @@ static XDATA uint8_t __display_en = 0;  //!< display enable
 void display_en(uint8_t en) {
   __display_en = en;
 }
-#ifdef LED_CONTINUOUS
 static XDATA uint8_t __display_led = 0;  //!< display led
 /**
  * @fn display_led
@@ -32,11 +45,8 @@ static XDATA uint8_t __display_led = 0;  //!< display led
 void display_led(uint8_t num) {
   __display_led = num;
 }
-#else
-#endif
 
 static XDATA uint8_t __display_seg[__SEG_CNT] = {0};  //!< display segment
-#ifdef SEG_CONTINUOUS
 /**
  * @fn display_seg
  * @brief display segment
@@ -73,8 +83,6 @@ void display_seg7(
   __display_seg[6] = seg7;
   __display_seg[7] = seg8;
 }
-#else
-#endif
 static XDATA enum __display_base __db = DISPLAY_BASE_DEC;  //!< display base
 /**
  * @fn display_base

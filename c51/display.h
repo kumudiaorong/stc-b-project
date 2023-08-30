@@ -2,56 +2,8 @@
 #define __DISPLAY_H__
 
 #include "def.h"
-#define SEG_CONTINUOUS
-#define SEG_SEL_CONTINUOUS
-#define LED_CONTINUOUS
-
-#define __DISPLAY_INIT() __DO_WHILE0(P0M0 = 0xff; P0M1 = 0x00; P2M0 |=(1<<3); P2M1 &= ~(1<<3))
-
-#define __LED_0 P0_0
-#define __LED_1 P0_1
-#define __LED_2 P0_2
-#define __LED_3 P0_3
-#define __LED_4 P0_4
-#define __LED_5 P0_5
-#define __LED_6 P0_6
-#define __LED_7 P0_7
-
-#define __LED_EN() __DO_WHILE0(P2_3 = 1)
-#define __LED_DIS() __DO_WHILE0(P2_3 = 0)
-
-#ifdef LED_CONTINUOUS
-#define __LED P0
-#define __LED_SET(val) __DO_WHILE0(P0 = (val))
-#else
-#endif
-
-#define __SEG_A P0_0
-#define __SEG_B P0_1
-#define __SEG_C P0_2
-#define __SEG_D P0_3
-#define __SEG_E P0_4
-#define __SEG_F P0_5
-#define __SEG_G P0_6
-#define __SEG_H P0_7
 
 #define __SEG_CNT 8
-#define __SEG_SEL_0 P2_0
-#define __SEG_SEL_1 P2_1
-#define __SEG_SEL_2 P2_2
-
-#define __SEG_EN() __DO_WHILE0(P2_3 = 0)
-#define __SEG_DIS() __DO_WHILE0(P2_3 = 1)
-
-#ifdef SEG_CONTINUOUS
-#define __SEG_SET(seg) __DO_WHILE0(P0 = (seg))
-#else
-#endif
-
-#ifdef SEG_SEL_CONTINUOUS
-#define __SEG_SEL_SET(sel) __DO_WHILE0(P2 = P2 & 0xf8 | (sel))
-#else
-#endif
 
 extern XDATA uint8_t display_num_decoding[16];
 extern XDATA uint8_t display_num_index[__SEG_CNT];
