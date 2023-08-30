@@ -1,8 +1,8 @@
 #define TEST 1
 #if TEST == 0
-#include "def.h"
 #include "adc.h"
 #include "beep.h"
+#include "def.h"
 #include "detail/sys.h"
 #include "display.h"
 #include "hall.h"
@@ -10,9 +10,10 @@
 #include "nvm.h"
 #include "rtc.h"
 #include "sys.h"
-#include "uart.h"
 #include "timer.h"
+#include "uart.h"
 #include "vib.h"
+
 uint32_t i = 0;
 void update(void) {
   // i = adc.rop;
@@ -57,11 +58,28 @@ void beep_test(void) REENTRANT {
 }
 
 #elif TEST == 1
+#include "display.h"
+#include "key.h"
 #include "sys.h"
+#include "timer.h"
 #include "uart.h"
-unsigned char buf[9];
-void uart_recv_test(void) {
-  uart_send(buf, 8);
+
+unsigned char buf1[9];
+unsigned char buf2[9];
+void uart1_recv_test(void)REENTRANT {
+  uart_send(UART1, buf1, 8);
+  uart_send(UART2_Ext, buf1, 8);
+}
+void uart1_send_test(void) {
+  uart_send(UART1, buf1, 8);
+}
+void uart2_recv_test(void) {
+}
+void uart2_send_test(void) {
+  uart_send(UART2_Ext, buf1, 8);
+}
+void my100ms(void) {
+  display_num(sys_cnt);
 }
 #endif
 void loop(void) {
@@ -112,9 +130,18 @@ void main(void) {
   sys_register(VIB, addhandler, VIBSTART);
   sys_register(VIB, addhandler, VIBSTOP);
 #elif TEST == 1
-  uart_init();
-  uart_cfg_recv(buf, 8);
-  sys_register(UART, uart_recv_test, UARTRECVOVER);
+  key_init();
+  display_init();
+  display_en(0xff);
+  timer_init();
+  uart_init(UART1 | UART2_Ext);
+  uart_cfg_recv(UART1, buf1, 8);
+  uart_cfg_recv(UART2_Ext, buf2, 8);
+  sys_register(UART, uart1_recv_test, CONUART(UART1, UARTRECVOVER));
+  // sys_register(UART, uart2_recv_test, CONUART(UART2_Ext, UARTRECVOVER));
+  // sys_register(KEY, uart1_send_test, CONKEY(0, KEYPRESS));
+  // sys_register(KEY, uart2_send_test, CONKEY(1, KEYPRESS));
+  sys_register(TIMER, my100ms, TIMER100MS);
 #endif
   sys_exec(loop);
 }

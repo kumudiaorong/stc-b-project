@@ -7,7 +7,7 @@ typedef void (*sys_callback_t)(void);
 void sys_init(uint32_t sysclk);
 void sys_register(uint8_t idx, sys_callback_t callback, uint32_t cfg);
 void sys_exec(sys_callback_t callback);
-// void sys_test(uint32_t msg) REENTRANT;
+extern uint32_t sys_cnt;
 // void sys_set(uint32_t msg);
 // void led_test(uint8_t msg);
 #endif
