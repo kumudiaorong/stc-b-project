@@ -81,41 +81,46 @@ static XDATA __flag_t nav_flag = 0;
 #endif
 #ifdef USE_BEEP
 #include "beep.h"
-static XDATA uint16_t step;
+static XDATA uint16_t beep_sum = 0;
+uint16_t freq = 1000;
 void beep_init(void) {
-  CCAPM1 |= 0x48;
-  CMOD |= 0x8;
+  // step = __sysclk / 24 / __BEEP_DEFAULT_FREQ;
+  beep_sum = __sysclk / 24 / freq;
+  CCAPM0 |= 0x48;
   PPCA = 1;
+
   P3M0 |= 1 << 4;
   P3M1 &= ~(1 << 4);
   P3_4 = 0;  // pull voltage to low to protect buzzer
-  step = (65536 - __sysclk / 6 / __BEEP_DEFAULT_FREQ);
+
+  P_SW1 |= 0x10;
 }
 void beep_on(void) {
-  CCAPM1 |= 0x01;
-  CCAP1H = step >> 8;
-  CCAP1L = step & 0xff;
+  CCAP0H = beep_sum >> 8;
+  CCAP0L = beep_sum & 0xff;
+  beep_sum += __sysclk / 24 / freq;
+  CCAPM0 |= 0x01;
 }
 void beep_off(void) {
-  CCAPM1 &= ~0x01;
+  CCAPM0 &= ~0x01;
   P3_4 = 0;  // pull voltage to low to protect buzzer
 }
-void beep_freq(uint16_t freq) REENTRANT {
-  step = (65536 - __sysclk / 6 / freq);
-}
 INTERRUPT_USING(__beep, __BEEP_VECTOR, 1) {
+  CCF0 = 0;
+  CCAP0H = beep_sum >> 8;
+  CCAP0L = beep_sum & 0xff;
+  beep_sum += __sysclk / 24 / freq;
   P3_4 = !P3_4;  // make buzzer sound
-  CCAP1L = (((CCAP1H * 256) + CCAP1L) + step) & 0xff;
-  CCAP1H = (((CCAP1H * 256) + CCAP1L) + step) >> 8;
-  CCF1 = 0;
+  display_led = !display_led;
+  // tmp = CCAP1L;
 }
 #endif
 #ifdef USE_DISPLAY
 #include "display.h"
+uint8_t display_led = 0;  //!< display led
 uint8_t display_num_decoding[16] = {
   0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71};  //!< decoding table
 uint8_t display_seg[8] = {0};                                                                       //!< display segment
-uint8_t display_led = 0;                                                                            //!< display led
 static XDATA uint8_t display_begin = 0, display_end = 0;                                            //!< display enable
 /**
  * @fn display_init
@@ -133,20 +138,6 @@ void display_init(void) {
 void display_area(uint8_t begin, uint8_t end) {
   display_begin = begin;
   display_end = end;
-}
-enum __display_base display_base = DISPLAY_BASE_DEC;  //!< display base
-/**
- * @fn display_num
- * @brief display number
- * @param num
- * @return none
- */
-void display_num(uint32_t num) REENTRANT {
-  uint8_t i = 0;
-  for(; i < 8; i++) {
-    display_seg[i] = display_num_decoding[num % display_base];
-    num /= display_base;
-  }
 }
 #endif
 #ifdef USE_HALL
@@ -551,6 +542,12 @@ void sys_init(uint32_t clk) {
   TL0 = (65535 - __sysclk / 1000) & 0xff;
   IE |= 0x02;
   IP &= ~0x2;
+#ifdef USE_BEEP
+  CCON = 0;
+  CH = 0;
+  CL = 0;
+  CMOD = 0;
+#endif
 }
 
 /**
@@ -583,10 +580,10 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
 #ifdef USE_DISPLAY
   if(display_index < display_end) {
     if(display_index < 0x8) {
-      P2 = P2 & 0xf8 | display_index;  //__SEG_SEL_SET(display_num_index[display_index]);
-      P0 = 0;                                  //__SEG_SET(0);
-      P2_3 = 0;                                //__SEG_EN();
-      P0 = display_seg[display_index];         //__SEG_SET(display_seg[display_index]);
+      P2 = P2 & 0xf8 | display_index;   //__SEG_SEL_SET(display_num_index[display_index]);
+      P0 = 0;                           //__SEG_SET(0);
+      P2_3 = 0;                         //__SEG_EN();
+      P0 = display_seg[display_index];  //__SEG_SET(display_seg[display_index]);
     }
     ++display_index;
   } else {
@@ -629,7 +626,6 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
   ++__sys_timer_cnt;
 #endif
 }
-
 /**
  * @fn sys_exec
  * @brief system exec
@@ -641,9 +637,12 @@ void sys_exec(sys_callback_t callback) {
   IE |= 0x80;
   // CMOD |= 0x1;
   TCON |= 0x50;  // timer1 run
+#ifdef USE_BEEP
   CR = 1;
+#endif
   // TR1 = 0;  // T1
   // TR0 = 1;  // T0开始计时
+
   while(1) {
     uint8_t i = 0;
 #ifdef USE_ADC
@@ -739,31 +738,26 @@ void sys_register(enum RegisterType reg, sys_callback_t callback, uint32_t cfg) 
       uart_cfg[cfg].callback = callback;
       break;
 #endif
+#define REG_CASE(Case, Name)               \
+  case Case :                              \
+    Name##_callback_table[cfg] = callback; \
+    break;
 #ifdef USE_TIMER
-    case RegTimer :
-      sys_timer_callback_table[cfg] = callback;
-      break;
+      REG_CASE(RegTimer, sys_timer)
 #endif
 #ifdef USE_KEY
-    case RegKey :
-      key_callback_table[cfg] = callback;
-      break;
+      REG_CASE(RegKey, key)
 #endif
 #ifdef USE_VIB
-    case RegVib :
-      vib_callback_table[cfg] = callback;
-      break;
+      REG_CASE(RegVib, vib)
 #endif
 #ifdef USE_HALL
-    case RegHall :
-      hall_callback_table[cfg] = callback;
-      break;
+      REG_CASE(RegHall, hall)
 #endif
 #ifdef USE_ADC
-    case RegNav :
-      nav_callback_table[cfg] = callback;
-      break;
+      REG_CASE(RegNav, nav)
 #endif
+#undef REG_CASE
     default :
       break;
   }

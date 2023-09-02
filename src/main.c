@@ -4,7 +4,8 @@
 // #define TEST_DISPLAY
 // #define TEST_TIMER
 // #define TEST_VIB_HALL_KEY_ADC
-#define TEST_RTC_NVM
+// #define TEST_RTC_NVM
+// #define TEST_BEEP
 #ifdef TEST_UART
 #include "sys.h"
 #include "uart.h"
@@ -204,11 +205,11 @@ void main(void) {
   sys_exec(0);
 }
 #elif defined(TEST_RTC_NVM)
+#include "display.h"
+#include "key.h"
 #include "nvm.h"
 #include "rtc.h"
 #include "sys.h"
-#include"display.h"
-#include"key.h"
 
 static uint8_t cnt1 = 0, cnt2 = 0;
 static uint8_t mode = 0;
@@ -287,173 +288,50 @@ void main(void) {
   sys_register(RegKey, key2_press_test, CONKEY(DevKey2, EventKeyPress));
   sys_exec(0);
 }
-#elif TEST_ALL
+#elif defined(TEST_BEEP)
 #include "adc.h"
 #include "beep.h"
 #include "display.h"
-#include "hall.h"
 #include "key.h"
-#include "uart.h"
-#include "vib.h"
+#include "sys.h"
 
-unsigned char buf1[9];
-unsigned char buf2[9];
-uint16_t freq = 300;
-#define BUF_LEN 2
-
-static uint32_t i = 0;
-
-void _10ms_test(void) {
-  static uint8_t i = 0;
-  display_seg[0] = display_num_decoding[i];
-  if(++i == 10) {
-    i = 0;
-  }
-}
-void _100ms_test(void) {
-  // static uint8_t i = 0;
-  // display_seg[1] = display_num_decoding[i];
-  // if(++i == 10) {
-  //   i = 0;
-  // }
-  display_num(i);
-}
-void _1s_test(void) {
-  static uint8_t i = 0;
-  display_seg[2] = display_num_decoding[i];
-  if(++i == 10) {
-    i = 0;
-  }
-}
-// const char CODE key1p[] = "key1 press";
 void key1_press_test(void) {
-  // uart_send(DevUART1, "key1 press", 10);
-  ++i;
-  // beep_on();
-}
-// const char CODE key1r[] = "key1 release";
-void key1_release_test(void) {
-  // uart_send(DevUART1, "key1 release", 12);
-  ++i;
-}
-// const char CODE key2p[] = "key2 press";
-void key2_press_test(void) {
-  // uart_send(DevUART1, "key2 press", 10);
-  ++i;
-  // beep_off();
-}
-// const char CODE key2r[] = "key2 release";
-void key2_release_test(void) {
-  // uart_send(DevUART1, "key2 release", 12);
-  ++i;
-}
-// const char CODE vib_start[] = "vib start";
-void vib_start_test(void) {
-  // uart_send(DevUART1, "vib start", 9);
-  ++i;
-}
-void hall_get_close_test(void) {
-  // uart_send(DevUART1, "hall get close", 14);
-  ++i;
-}
-void hall_get_away_test(void) {
-  // uart_send(DevUART1, "hall get away", 13);
-  ++i;
+  static bit flag = 0;
+  if(flag) {
+    flag = 0;
+    beep_off();
+    display_led &= 0x7f;
+  } else {
+    flag = 1;
+    beep_on();
+    display_led |= 0x80;
+  }
 }
 void nav_up_press_test(void) {
-  // uart_send(DevUART1, "nav up press", 12);
-  ++i;
-  // freq += 10;
-  // beep_freq(freq);
-}
-void nav_up_release_test(void) {
-  // uart_send(DevUART1, "nav up release", 14);
-  ++i;
+  freq += 10;
+  display_seg[4] = display_num_decoding[freq / 1000];
+  display_seg[5] = display_num_decoding[(freq / 100) % 10];
+  display_seg[6] = display_num_decoding[(freq / 10) % 10];
+  display_seg[7] = display_num_decoding[freq % 10];
 }
 void nav_down_press_test(void) {
-  // uart_send(DevUART1, "nav down press", 14);
-  ++i;
-  // freq -= 10;
-  // beep_freq(freq);
-}
-void nav_down_release_test(void) {
-  // uart_send(DevUART1, "nav down release", 16);
-  ++i;
-}
-void nav_left_press_test(void) {
-  // uart_send(DevUART1, "nav left press", 14);
-  ++i;
-}
-void nav_left_release_test(void) {
-  // uart_send(DevUART1, "nav left release", 16);
-  ++i;
-}
-void nav_right_press_test(void) {
-  // uart_send(DevUART1, "nav right press", 15);
-  ++i;
-}
-void nav_right_release_test(void) {
-  // uart_send(DevUART1, "nav right release", 17);
-  ++i;
-}
-void nav_center_press_test(void) {
-  // uart_send(DevUART1, "nav center press", 16);
-  ++i;
-}
-void nav_center_release_test(void) {
-  ++i;
-  // uart_send(DevUART1, "nav center release", 18);
-}
-void nav_key3_press_test(void) {
-  ++i;
-  // uart_send(DevUART1, "nav key3 press", 14);
-}
-void nav_key3_release_test(void) {
-  ++i;
-  // uart_send(DevUART1, "nav key3 release", 16);
-}
-void loop(void) {
+  freq -= 10;
+  display_seg[4] = display_num_decoding[freq / 1000];
+  display_seg[5] = display_num_decoding[(freq / 100) % 10];
+  display_seg[6] = display_num_decoding[(freq / 10) % 10];
+  display_seg[7] = display_num_decoding[freq % 10];
 }
 void main(void) {
   sys_init(27000000);
   key_init();
-  vib_init();
   adc_init();
-  hall_init();
-  // beep_init();
+  beep_init();
   display_init();
   display_area(0, 8);
-  // beep_freq(300);
-  uart_init(InitUART1 | InitUART2_485);
-  // uart_cfg_recv(DevUART1, buf1, BUF_LEN);
-  // uart_cfg_recv(DevUART2, buf2, BUF_LEN);
-  // sys_register(RegUart, uart1_recv_test, CONUART(DevUART1, EventUartRecvOver));
-  // sys_register(RegUart, uart1_send_test, CONUART(DevUART1, EventUartSendOver));
-  // sys_register(RegUart, uart2_send_test, CONUART(DevUART2, EventUartSendOver));
-  // sys_register(RegUart, uart2_recv_test, CONUART(DevUART2, EventUartRecvOver));
-  // sys_register(RegTimer, _10ms_test, EventTimer10ms);
-  sys_register(RegTimer, _100ms_test, EventTimer100ms);
-  // sys_register(RegTimer, _1s_test, EventTimer1S);
   sys_register(RegKey, key1_press_test, CONKEY(DevKey1, EventKeyPress));
-  sys_register(RegKey, key1_release_test, CONKEY(DevKey1, EventKeyReleas));
-  sys_register(RegKey, key2_press_test, CONKEY(DevKey2, EventKeyPress));
-  sys_register(RegKey, key2_release_test, CONKEY(DevKey2, EventKeyReleas));
-  sys_register(RegVib, vib_start_test, EventVibStart);
-  sys_register(RegHall, hall_get_close_test, EventHallGetClose);
-  sys_register(RegHall, hall_get_away_test, EventHallGetAway);
   sys_register(RegNav, nav_up_press_test, CONNAV(DevNavUp, EventNavPress));
-  sys_register(RegNav, nav_up_release_test, CONNAV(DevNavUp, EventNavRelease));
   sys_register(RegNav, nav_down_press_test, CONNAV(DevNavDown, EventNavPress));
-  sys_register(RegNav, nav_down_release_test, CONNAV(DevNavDown, EventNavRelease));
-  sys_register(RegNav, nav_left_press_test, CONNAV(DevNavLeft, EventNavPress));
-  sys_register(RegNav, nav_left_release_test, CONNAV(DevNavLeft, EventNavRelease));
-  sys_register(RegNav, nav_right_press_test, CONNAV(DevNavRight, EventNavPress));
-  sys_register(RegNav, nav_right_release_test, CONNAV(DevNavRight, EventNavRelease));
-  sys_register(RegNav, nav_center_press_test, CONNAV(DevNavCenter, EventNavPress));
-  sys_register(RegNav, nav_center_release_test, CONNAV(DevNavCenter, EventNavRelease));
-  sys_register(RegNav, nav_key3_press_test, CONNAV(DevNavKey3, EventNavPress));
-  sys_register(RegNav, nav_key3_release_test, CONNAV(DevNavKey3, EventNavRelease));
-  sys_exec(loop);
+  sys_exec(0);
 }
 #endif
 #elif TEST == 1
