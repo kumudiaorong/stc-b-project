@@ -3,10 +3,8 @@
 #include "def.h"
 #define __HALL P1_2
 
-
-enum HallEvent { HALLGETCLOSE, HALLGETAWAY, HALLNONE };
+enum HallEvent { EventHallGetClose, EventHallGetAway };
 
 void hall_init(void);
-extern uint8_t HALL;
 
 #endif

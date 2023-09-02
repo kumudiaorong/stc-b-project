@@ -4,9 +4,8 @@
 #define __KEY_1 P3_2
 #define __KEY_2 P3_3
 #define __KEY_3 P1_7
-#define __KEY_CNT 3
 #define __KEY_PRESS(x) (x == 0)
-#define CONKEY(key, event) (key << 2 | event)
+#define CONKEY(dev, event) (dev << 1 | event)
 /**
  * @brief use interrupt to detect key
  *
@@ -28,13 +27,12 @@
  *  =PX1 = 1;
  *  =PX0 = 1;
  */
-#define __KEY_INIT() __DO_WHILE0(IE |= 0x5; TCON &= ~0x5; IP |= 0x5)
 #endif
 #ifdef __KEY_USE_POLLING
 #define __KEY_INIT()
 #endif
-enum KeyEvent { KEYPRESS, KEYRELEASE, KEYNONE };
-enum KeyNum { KEY1, KEY2, KEY3 };
+enum KeyEvent { EventKeyPress, EventKeyReleas, KEYNONE };
+enum KeyDev { DevKey1, DevKey2, DevKey3 };
 void key_init(void);
 uint8_t key_get(void);
 extern uint8_t KEY;

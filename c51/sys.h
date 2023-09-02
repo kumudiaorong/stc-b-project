@@ -4,6 +4,7 @@
 typedef void (*sys_callback_t)(void);
 
 #define CONEVENT(sys, dri) ((sys << 4) | dri)
+enum RegisterType { RegUart, RegKey, RegHall, RegNav, RegVib, RegBeep, RegRtc, RegNvm, RegTimer, RegSys };
 void sys_init(uint32_t sysclk);
 void sys_register(uint8_t idx, sys_callback_t callback, uint32_t cfg);
 void sys_exec(sys_callback_t callback);

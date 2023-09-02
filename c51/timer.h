@@ -2,7 +2,5 @@
 #define __TIMER_H__
 #include "def.h"
 #include "sys.h"
-enum TimerEvent { TIMER1MS, TIMER10MS, TIMER100MS, TIMER1S };
-void timer_init(void);
-extern uint8_t TIMER;
+enum TimerEvent { EventTimer10ms, EventTimer100ms, EventTimer1S };
 #endif
