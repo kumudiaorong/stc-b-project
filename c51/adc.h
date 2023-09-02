@@ -3,7 +3,7 @@
 #include "def.h"
 
 SBIT(EADC, 0xA8, 5);
-
+SFR(P1ASF, 0x9D);  // 0000,0000 端口1模拟功能配置寄存器
 /**
  * @brief adc control register
  * @note
@@ -27,7 +27,6 @@ SFR(ADC_RESL, 0xBE);
 enum NavEvent {
   EventNavPress,
   EventNavRelease,
-  NAVNONE = 7,
 };
 enum NavDev {
   DevNavKey3,

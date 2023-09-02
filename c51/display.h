@@ -2,7 +2,12 @@
 #define __DISPLAY_H__
 
 #include "def.h"
+SFR(P0, 0x80);
 
+SFR(P0M0, 0x94);
+SFR(P0M1, 0x93);
+
+SBIT(P2_3, 0xA0, 3);
 extern uint8_t display_led;     //!< display led
 extern uint8_t display_seg[8];  //!< display segment
 extern uint8_t display_num_decoding[16];
@@ -19,7 +24,7 @@ enum __display_base {
   DISPLAY_BASE_DEC = 10,
   DISPLAY_BASE_HEX = 16,
 };
-extern XDATA enum __display_base display_base;  //!< display base, default 10
+extern enum __display_base display_base;  //!< display base, default 10
 /**
  * @brief display a number on led segment
  *

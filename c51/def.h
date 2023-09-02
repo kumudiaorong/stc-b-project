@@ -42,15 +42,7 @@ typedef short int int16_t;
 typedef unsigned long int uint32_t;
 typedef long int32_t;
 
-SFR(P0, 0x80);
-SBIT(P0_0, 0x80, 0);
-SBIT(P0_1, 0x80, 1);
-SBIT(P0_2, 0x80, 2);
-SBIT(P0_3, 0x80, 3);
-SBIT(P0_4, 0x80, 4);
-SBIT(P0_5, 0x80, 5);
-SBIT(P0_6, 0x80, 6);
-SBIT(P0_7, 0x80, 7);
+
 
 SFR(P1, 0x90);
 SBIT(P1_0, 0x90, 0);
@@ -63,7 +55,6 @@ SBIT(P1_6, 0x90, 6);
 SBIT(P1_7, 0x90, 7);
 
 SFR(P2, 0xA0);
-SBIT(P2_3, 0xA0, 3);
 SBIT(P2_4, 0xA0, 4);
 
 SFR(P3, 0xB0);
@@ -94,12 +85,10 @@ SFR(TH1, 0x8D);
 SFR(T2H, 0xD6);  // 0000,0000 T2高字节
 SFR(T2L, 0xD7);  // 0000,0000 T2低字节
 
-SFR(P1ASF, 0x9D);  // 0000,0000 端口1模拟功能配置寄存器
 
 SFR(CLK_DIV, 0x97);  // 0000,0000 时钟分频控制寄存器
 
-SFR(P0M0, 0x94);
-SFR(P0M1, 0x93);
+
 SFR(P1M0, 0x92);
 SFR(P1M1, 0x91);
 SFR(P2M0, 0x96);

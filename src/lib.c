@@ -1,16 +1,6 @@
-#include "adc.h"
-#include "beep.h"
 #include "def.h"
 #include "detail/sys.h"
-#include "display.h"
-#include "hall.h"
-#include "key.h"
-#include "nvm.h"
-#include "rtc.h"
 #include "sys.h"
-#include "timer.h"
-#include "uart.h"
-#include "vib.h"
 
 #define USE_ADC
 // #define USE_BEEP
@@ -18,12 +8,27 @@
 #define USE_HALL
 #define USE_KEY
 #define USE_NVM
-
 #define USE_RTC
 #define USE_TIMER
-#define __FLAG_MASK (0x1 << ((sizeof(__sys_msg_t) << 3) - 1))
+#define USE_UART
+#define USE_VIB
+
+typedef uint8_t __flag_t;
+#define __FLAG_MASK (0x1 << ((sizeof(__flag_t) << 3) - 1))
+#define __FLAG_SIZE sizeof(__flag_t)
 
 #ifdef USE_ADC
+#include "adc.h"
+static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 116, 113, 109, 107, 104, 101, 99, 97,
+  95, 93, 91, 90, 88, 86, 85, 84, 82, 81, 80, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 67, 66, 65, 64, 63, 63,
+  62, 61, 61, 60, 59, 58, 58, 57, 57, 56, 55, 55, 54, 54, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48, 48, 47, 47, 46, 46,
+  45, 45, 44, 44, 43, 43, 42, 42, 41, 41, 41, 40, 40, 39, 39, 38, 38, 38, 37, 37, 36, 36, 36, 35, 35, 34, 34, 34, 33,
+  33, 32, 32, 32, 31, 31, 31, 30, 30, 29, 29, 29, 28, 28, 28, 27, 27, 27, 26, 26, 26, 25, 25, 24, 24, 24, 23, 23, 23,
+  22, 22, 22, 21, 21, 21, 20, 20, 20, 19, 19, 19, 18, 18, 18, 17, 17, 16, 16, 16, 15, 15, 15, 14, 14, 14, 13, 13, 13,
+  12, 12, 12, 11, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 5, 5, 54, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, -1, -1,
+  -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6, -7, -7, -8, -8, -9, -9, -10, -10, -11, -11, -12, -13, -13, -14, -14, -15,
+  -16, -16, -17, -18, -19, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38,
+  -40};                  //!< adc temperature table
 XDATA adc_t adcs = {0};  //!< adc data
 /**
  * @fn adc_init
@@ -36,28 +41,17 @@ void adc_init(void) {
 #define __ADC_START(channel) __DO_WHILE0(ADC_RES = 0; ADC_RESL = 0; ADC_CONTR = (0x88 | (channel)))
   __ADC_START(0x3);  // adc start with rt channel
 }
-static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 116, 113, 109, 107, 104, 101, 99, 97,
-  95, 93, 91, 90, 88, 86, 85, 84, 82, 81, 80, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 67, 66, 65, 64, 63, 63,
-  62, 61, 61, 60, 59, 58, 58, 57, 57, 56, 55, 55, 54, 54, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48, 48, 47, 47, 46, 46,
-  45, 45, 44, 44, 43, 43, 42, 42, 41, 41, 41, 40, 40, 39, 39, 38, 38, 38, 37, 37, 36, 36, 36, 35, 35, 34, 34, 34, 33,
-  33, 32, 32, 32, 31, 31, 31, 30, 30, 29, 29, 29, 28, 28, 28, 27, 27, 27, 26, 26, 26, 25, 25, 24, 24, 24, 23, 23, 23,
-  22, 22, 22, 21, 21, 21, 20, 20, 20, 19, 19, 19, 18, 18, 18, 17, 17, 16, 16, 16, 15, 15, 15, 14, 14, 14, 13, 13, 13,
-  12, 12, 12, 11, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 5, 5, 54, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, -1, -1,
-  -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6, -7, -7, -8, -8, -9, -9, -10, -10, -11, -11, -12, -13, -13, -14, -14, -15,
-  -16, -16, -17, -18, -19, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38,
-  -40};  //!< adc temperature table
 /**
  * @fn __adc
  * @brief adc interrupt function
  * @return none
  */
 INTERRUPT_USING(__adc, 5, 1) {
-  static XDATA uint8_t curchannel = 0x3;  // rt channel
-  static XDATA uint32_t sum = 0;
-  static XDATA uint16_t count = 0;
+  static XDATA uint8_t count = 0, curchannel = 0x3;  // rt channel
+  static XDATA uint16_t sum = 0;
   sum += (ADC_RES << 2) + (ADC_RESL >> 6);  //__ADC_GET();
   ++count;
-#define __ADC_AVG_CNT 1
+#define __ADC_AVG_CNT 2
   if(count == __ADC_AVG_CNT) {
     switch(curchannel) {
       case 0x3 :  // rt channel
@@ -83,11 +77,10 @@ INTERRUPT_USING(__adc, 5, 1) {
 #undef __ADC_START
 }
 static XDATA sys_callback_t nav_callback_table[12] = {0};  //!< adc callback table
-static XDATA uint8_t nav_last_state = NAVNONE, nav_cnt = 0;
-static XDATA uint8_t nav_flag = 0;
+static XDATA __flag_t nav_flag = 0;
 #endif
-
 #ifdef USE_BEEP
+#include "beep.h"
 static XDATA uint16_t step;
 void beep_init(void) {
   CCAPM1 |= 0x48;
@@ -118,9 +111,12 @@ INTERRUPT_USING(__beep, __BEEP_VECTOR, 1) {
 }
 #endif
 #ifdef USE_DISPLAY
-uint8_t display_seg[8] = {0};                             //!< display segment
-uint8_t display_led = 0;                                  //!< display led
-static XDATA uint8_t display_begin = 0, display_end = 0;  //!< display enable
+#include "display.h"
+uint8_t display_num_decoding[16] = {
+  0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71};  //!< decoding table
+uint8_t display_seg[8] = {0};                                                                       //!< display segment
+uint8_t display_led = 0;                                                                            //!< display led
+static XDATA uint8_t display_begin = 0, display_end = 0;                                            //!< display enable
 /**
  * @fn display_init
  * @brief display init
@@ -131,7 +127,6 @@ void display_init(void) {
   P0M1 = 0x00;
   P2M0 |= (1 << 3);
   P2M1 &= ~(1 << 3);
-  display_led = 0x00;
   P2_3 = 1;  //__LED_EN();
 }
 
@@ -139,7 +134,7 @@ void display_area(uint8_t begin, uint8_t end) {
   display_begin = begin;
   display_end = end;
 }
-XDATA enum __display_base display_base = DISPLAY_BASE_DEC;  //!< display base
+enum __display_base display_base = DISPLAY_BASE_DEC;  //!< display base
 /**
  * @fn display_num
  * @brief display number
@@ -155,9 +150,7 @@ void display_num(uint32_t num) REENTRANT {
 }
 #endif
 #ifdef USE_HALL
-static XDATA uint8_t hall_flag = 0;  //!< vib flag
-static bit hall_state = 1;
-static XDATA sys_callback_t hall_callback_table[2] = {0};  //!< hall callback table
+#include "hall.h"
 /**
  * @fn hall_init
  * @brief hall init
@@ -167,11 +160,12 @@ void hall_init(void) {
   P1M1 &= ~(1 << 2);
   P1M0 |= 1 << 2;
 }
+static XDATA sys_callback_t hall_callback_table[2] = {0};  //!< hall callback table
+static XDATA __flag_t hall_flag = 0;                       //!< vib flag
+static bit hall_state = 1;
 #endif
 #ifdef USE_KEY
-static uint8_t key_flag = 0;
-static XDATA sys_callback_t key_callback_table[6] = {0};  //!< key callback table
-static XDATA uint8_t key_states = 0;                      //!< key states,bit 0-2 for key1-3, 1 for press, 0 for release
+#include "key.h"
 
 /**
  * @fn key_init
@@ -183,15 +177,9 @@ void key_init(void) {
   TCON &= ~0x5;
   IP |= 0x5;
 }
-/**
- * @fn key_get
- * @brief get key state
- * @return key state
- */
-uint8_t key_get(void) {
-  return key_states;
-}
-static XDATA uint8_t key_state[3] = {0};  //!< key state
+static XDATA sys_callback_t key_callback_table[6] = {0};  //!< key callback table
+static XDATA __flag_t key_flag = 0;
+static XDATA uint8_t key_states = 0;  //!< key states,bit 0-2 for key1-3, 1 for press, 0 for release
 /**
  * @fn __key##idx
  * @brief key interrupt function
@@ -214,8 +202,11 @@ __KEY_BY_INT(1, IE1_VECTOR)
 #endif
 #ifdef USE_NVM
 #include "nvm.h"
-
-static void start(void) {
+#define __NVM_SCL P5_5
+#define __NVM_SDA P4_0
+#define __NVM_DEVICE_ADDR 0x50
+bit errno_nvm = 0;
+static void nvm_iic_start(void) {
   __NVM_SDA = 1;
   NOP();
   __NVM_SCL = 1;
@@ -225,7 +216,7 @@ static void start(void) {
   __NVM_SCL = 0;
   NOP();
 }
-static void stop(void) {
+static void nvm_iic_stop(void) {
   __NVM_SDA = 0;
   NOP();
   __NVM_SCL = 1;
@@ -233,7 +224,7 @@ static void stop(void) {
   __NVM_SDA = 1;
   NOP();
 }
-static void write_byte(uint8_t dat) {
+static void nvm_iic_write_byte(uint8_t dat) {
   uint8_t i = 0;
   for(; i < 8; i++) {
     __NVM_SDA = (dat & 0x80) >> 7;
@@ -245,7 +236,7 @@ static void write_byte(uint8_t dat) {
     NOP();
   }
 }
-static uint8_t rece_ack(void) {
+static uint8_t nvm_iic_recv_ack(void) {
   uint8_t i = 0;
   __NVM_SDA = 1;
   NOP();
@@ -257,8 +248,33 @@ static uint8_t rece_ack(void) {
   NOP();
   return i < 250 ? 1 : 0;
 }
-static uint8_t read_byte(void) {
+#define __ASSERT_STOP(expr, ret) \
+  if(!(expr)) {                  \
+    nvm_iic_stop();              \
+    errno_nvm = 1;               \
+    return ret;                  \
+  }
+void nvm_write(uint8_t addr, uint8_t dat) {
+  uint8_t i = 0;
+  nvm_iic_start();
+  nvm_iic_write_byte(__NVM_DEVICE_ADDR << 1);
+  __ASSERT_STOP(nvm_iic_recv_ack(), );
+  nvm_iic_write_byte(addr);
+  __ASSERT_STOP(nvm_iic_recv_ack(), );
+  nvm_iic_write_byte(dat);
+  nvm_iic_recv_ack();
+  nvm_iic_stop();
+}
+uint8_t nvm_read(uint8_t addr) {
   uint8_t i = 0, dat = 0;
+  nvm_iic_start();
+  nvm_iic_write_byte(__NVM_DEVICE_ADDR << 1);
+  __ASSERT_STOP(nvm_iic_recv_ack(), dat);
+  nvm_iic_write_byte(addr);
+  __ASSERT_STOP(nvm_iic_recv_ack(), dat);
+  nvm_iic_start();
+  nvm_iic_write_byte((__NVM_DEVICE_ADDR << 1) | 0x01);
+  __ASSERT_STOP(nvm_iic_recv_ack(), dat);
   for(; i < 8; i++) {
     NOP();
     __NVM_SCL = 1;
@@ -267,402 +283,14 @@ static uint8_t read_byte(void) {
     dat |= __NVM_SDA;
     __NVM_SCL = 0;
   }
-  return dat;
-}
-#define __ASSERT_STOP(expr, ret) \
-  if(!(expr)) {                  \
-    stop();                      \
-    return ret;                  \
-  }
-void nvm_write(uint8_t addr, uint8_t dat) {
-  uint8_t i = 0;
-  start();
-  write_byte(__NVM_DEVICE_ADDR << 1);
-  __ASSERT_STOP(rece_ack(), );
-  write_byte(addr);
-  __ASSERT_STOP(rece_ack(), );
-  write_byte(dat);
-  rece_ack();
-  stop();
-}
-uint8_t nvm_read(uint8_t addr) {
-  uint8_t i = 0, dat = 0;
-  start();
-  write_byte(__NVM_DEVICE_ADDR << 1);
-  __ASSERT_STOP(rece_ack(), dat);
-  write_byte(addr);
-  __ASSERT_STOP(rece_ack(), dat);
-  start();
-  write_byte((__NVM_DEVICE_ADDR << 1) | 0x01);
-  __ASSERT_STOP(rece_ack(), dat);
-  dat = read_byte();
-  stop();
+  nvm_iic_stop();
   return dat;
 }
 #undef __ASSERT_STOP
 
 #endif
-static uint8_t tmp = 0;
-
-uint32_t __sysclk = 0;  //!< system clock
-/**
- * @fn sys_init
- * @brief system init
- * @param clk
- * @return none
- */
-void sys_init(uint32_t clk) {
-  __sysclk = clk;
-  TMOD = 0x00;  // T0和T1都是工作在模式0下,即16位自动重装载模式
-  TH0 = (65535 - __sysclk / 1000) >> 8;
-  TL0 = (65535 - __sysclk / 1000) & 0xff;
-  IE |= 0x02;
-  IP &= ~0x2;
-}
-uint32_t __sys_timer_cnt = 0;  //!< system timer count
-
-#ifdef USE_TIMER
-static XDATA sys_callback_t sys_timer_callback_table[3] = {0};
-#endif
-static XDATA sys_callback_t vib_callback_table[1] = {0};  //!< vib callback table
-static XDATA uint8_t vib_state = 0;                       //!< vib state
-static XDATA uint8_t vib_flag = 0;                        //!< vib flag
-
-static XDATA uint8_t sys_timer_flag = 0;  //!< timer flag
-/**
- * @fn sys_timer
- * @brief system timer
- * @return none
- */
-INTERRUPT(__sys_use_timer, TF0_VECTOR) {
-  uint8_t i = 0;
-  static XDATA uint8_t display_index = 0;
-  uint8_t cur, ret = 0;
-#ifdef USE_ADC
-  cur = adcs.nav;
-  if(cur != NAVNONE && nav_last_state == NAVNONE) {
-    if(nav_cnt) {
-      --nav_cnt;
-      if(nav_cnt == 0) {
-        nav_flag |= cur + 1;
-        nav_last_state = cur;
-      }
-    } else {
-      nav_cnt = 5;
-    }
-  } else if(cur == NAVNONE && nav_last_state != NAVNONE) {
-    nav_flag |= (nav_last_state + 1) << 3;
-    nav_last_state = NAVNONE;
-  }
-#endif
-#ifdef USE_DISPLAY
-  if(display_index < display_end) {
-    if(display_index < 0x8) {
-      P2 = P2 & 0xf8 | (0x7 - display_index);  //__SEG_SEL_SET(display_num_index[display_index]);
-      P0 = 0;                                  //__SEG_SET(0);
-      P2_3 = 0;                                //__SEG_EN();
-      P0 = display_seg[display_index];         //__SEG_SET(display_seg[display_index]);
-    }
-    ++display_index;
-  } else {
-    P0 = 0;            //__LED_SET(0);
-    P2_3 = 1;          //__LED_EN();
-    P0 = display_led;  //__LED_SET(display_led);
-    display_index = display_begin;
-  }
-#endif
-#ifdef USE_HALL
-  if(hall_state != P1_2) {
-    hall_state = P1_2;
-    if(hall_callback_table[hall_state]) {
-      hall_flag |= hall_state | __FLAG_MASK;
-    }
-  }
-#endif
-  if((__sys_timer_cnt % 10) == 0) {
-    sys_timer_flag |= 0x1;
-    if((__sys_timer_cnt % 100) == 0) {
-      sys_timer_flag |= 0x2;
-      if((__sys_timer_cnt % 1000) == 0) {
-        sys_timer_flag |= 0x4;
-      }
-    }
-  }
-
-  if(P2_4 == 0) {  //__GET_VIB()) {
-    if(vib_state == 0) {
-      vib_flag = EventVibStart + 1;
-    }
-    vib_state = 15;
-  } else if(vib_state != 0) {
-    --vib_state;
-  }
-
-  ++__sys_timer_cnt;
-}
-
-static XDATA uint8_t uart_msg = 0;  //!< uart msg
-static void uart_callback(__sys_msg_t msg);
-static bit uart1_recv_flag = 0;
-static bit uart1_send_flag = 0;
-static bit uart2_recv_flag = 0;
-static bit uart2_send_flag = 0;
-
-typedef struct {
-  uint8_t *buf;
-  uint16_t len;
-  uint16_t idx;
-
-  sys_callback_t callback;
-} uart_cfg_t;
-static XDATA uart_cfg_t uart_cfg[4] = {{0}, {0}, {0}, {0}};
-/**
- * @fn sys_exec
- * @brief system exec
- * @param callback
- * @return none
- */
-void sys_exec(sys_callback_t callback) {
-  AUXR |= 0x90;  // T0，2工作在1T模式，且T2开始计时
-  IE |= 0x80;
-  // CMOD |= 0x1;
-  TCON |= 0x50;  // timer1 run
-  CR = 1;
-  // TR1 = 0;  // T1
-  // TR0 = 1;  // T0开始计时
-  while(1) {
-    uint8_t i = 0;
-#ifdef USE_ADC
-    if(nav_flag) {
-      if(nav_flag & 0x7) {
-        if(nav_callback_table[((nav_flag & 0x7) - 1) << 1]) {
-          nav_callback_table[((nav_flag & 0x7) - 1) << 1]();
-        }
-        nav_flag &= ~0x7;
-      }
-      if(nav_flag & 0x38) {
-        if(nav_callback_table[((((nav_flag >> 3) & 0x7) - 1) << 1) + 1]) {
-          nav_callback_table[((((nav_flag >> 3) & 0x7) - 1) << 1) + 1]();
-        }
-        nav_flag &= ~0x38;
-      }
-    }
-#endif
-#ifdef USE_HALL
-    if(hall_flag) {
-      if(hall_callback_table[hall_flag & ~__FLAG_MASK])
-        hall_callback_table[hall_flag & ~__FLAG_MASK]();
-      hall_flag = 0;
-    }
-#endif
-#ifdef USE_KEY
-
-    if(key_flag) {
-      i = 0;
-      for(; i < 3; ++i) {
-        if((key_flag << i) & __FLAG_MASK) {
-          key_callback_table[(i << 1) + ((key_flag >> i) & 0x1)]();
-        }
-      }
-      key_flag = 0;
-    }
-#endif
-
-    if(uart1_recv_flag) {
-      uart1_recv_flag = 0;
-      if(uart_cfg[0].callback)
-        uart_cfg[0].callback();
-      uart_cfg[0].idx = 0;
-    }
-    if(uart1_send_flag) {
-      uart1_send_flag = 0;
-      if(uart_cfg[1].callback)
-        uart_cfg[1].callback();
-    }
-    if(uart2_recv_flag) {
-      uart2_recv_flag = 0;
-      if(uart_cfg[2].callback)
-        uart_cfg[2].callback();
-      uart_cfg[2].idx = 0;
-    }
-    if(uart2_send_flag) {
-      uart2_send_flag = 0;
-      if(uart_cfg[3].callback)
-        uart_cfg[3].callback();
-    }
-
-    if(vib_flag) {
-      if(vib_callback_table[vib_flag - 1])
-        vib_callback_table[vib_flag - 1]();
-      vib_flag = 0;
-    }
-
-    if(sys_timer_flag) {
-      i = 0;
-      for(; i < 3; ++i) {
-        if(((sys_timer_flag >> i) & 0x1) && sys_timer_callback_table[i]) {
-          sys_timer_callback_table[i]();
-        }
-      }
-      sys_timer_flag = 0;
-    }
-    if(callback) {
-      callback();
-    }
-  }
-}
-uint32_t sys_cnt = 0;
-
-void uart_cfg_recv(enum UartDev dev, void *buf, uint16_t cnt) {
-  uart_cfg[dev << 1].buf = (uint8_t *)buf;
-  uart_cfg[dev << 1].len = cnt;
-  uart_cfg[dev << 1].idx = 0;
-}
-
-static void uart_callback(__sys_msg_t msg) {
-  if((msg >> 2) & 0x1) {
-    uart_cfg[msg & 0x3].callback();
-  }
-  if((msg >> 3) & 0x1) {
-    uart_cfg[msg & 0x3].callback();
-    uart_cfg[msg & 0x3].idx = 0;
-  }
-}
-void uart_init(uint8_t cfg) {
-  if(cfg & 0x1) {
-    AUXR &= ~0x1;  // select timer1 as baudrate generator
-    AUXR |= 0x40;  // timer1 divide by 12,timer2 divide by 12
-    PS = 1;        // interrupt priority 1
-    SCON |= 0x50;  // SM0 = 1, SM1 = 0, REN = 1 ,8-bit UART, variable baudrate, receive enable
-    TH1 = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) >> 8;
-    TL1 = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) & 0xFF;  // set baudrate
-    RI = 0;                                                           // clear receive interrupt flag
-    TI = 0;                                                           // clear transmit interrupt flag
-    ES = 1;                                                           // enable serial interrupt
-  }
-  if(cfg & 0x2) {
-    AUXR |= 0x04;   // timer1 divide by 12,timer2 divide by 12
-    IP2 |= 0x1;     // interrupt priority 1
-    S2CON |= 0x10;  // SM0 = 0, REN = 1 ,8-bit UART, variable baudrate, receive enable
-    T2H = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) >> 8;
-    T2L = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) & 0xFF;  // set baudrate
-    S2CON &= ~0x03;
-    IE2 |= 0x1;  // enable serial interrupt
-    P_SW2 |= (cfg >> 2) & 0x1;
-    P3M0 &= ~0x80;
-    P3M1 &= ~0x80;
-    P3_7 = 0x0;  // 485 set receive
-  }
-}
-
-void uart_send(enum UartDev dev, void *buf, uint8_t len) {
-  if(len) {
-    uart_cfg[(dev << 1) + 1].buf = (uint8_t *)buf;
-    uart_cfg[(dev << 1) + 1].len = len;
-    uart_cfg[(dev << 1) + 1].idx = 1;
-    if(dev) {
-      P3_7 = 0x1;
-      S2BUF = uart_cfg[3].buf[0];
-    } else {
-      SBUF = uart_cfg[1].buf[0];
-    }
-  }
-}
-INTERRUPT_USING(__uart1, __UART1_VECTOR, 1) {
-  if(RI) {
-    RI = 0;
-    if(uart_cfg[0].len) {
-      if(uart_cfg[0].idx < uart_cfg[0].len) {
-        uart_cfg[0].buf[uart_cfg[0].idx++] = SBUF;
-        if(uart_cfg[0].idx == uart_cfg[0].len) {
-          uart1_recv_flag = 1;
-        }
-      }
-    }
-  }
-  if(TI) {
-    TI = 0;
-    if(uart_cfg[1].idx < uart_cfg[1].len) {
-      SBUF = uart_cfg[1].buf[uart_cfg[1].idx++];
-    } else {
-      uart1_send_flag = 1;
-    }
-  }
-}
-INTERRUPT_USING(__uart2, __UART2_VECTOR, 1) {
-  while(S2CON & 0x01) {
-    S2CON &= ~0x01;
-    if(uart_cfg[2].len) {
-      if(uart_cfg[2].idx < uart_cfg[2].len) {
-        uart_cfg[2].buf[uart_cfg[2].idx++] = S2BUF;
-        if(uart_cfg[2].idx == uart_cfg[2].len) {
-          uart2_recv_flag = 1;
-        }
-      }
-    }
-    // else if(rx_buf_idx < __UART_RX_BUF_SIZE) {
-    //   rx_buf[rx_buf_idx++] = SBUF;
-    //   rx_buf_len++;
-    // }
-  }
-  while(S2CON & 0x02) {
-    S2CON &= ~0x02;
-    if(uart_cfg[3].idx < uart_cfg[3].len) {
-      S2BUF = uart_cfg[3].buf[uart_cfg[3].idx++];
-    } else {
-      uart2_send_flag = 1;
-      P3_7 = 0x0;
-    }
-  }
-}
-
-uint8_t display_num_decoding[16] = {
-  0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71};  //!< decoding table
-
-/**
- * @fn sys_register
- * @brief register sensor
- * @param event event type
- * @param callback callback function
- * @return none
- */
-void sys_register(enum RegisterType reg, sys_callback_t callback, uint32_t cfg) {
-  switch(reg) {
-    case RegUart :
-      uart_cfg[cfg].callback = callback;
-      break;
-    case RegTimer :
-      sys_timer_callback_table[cfg] = callback;
-      break;
-    case RegKey :
-      key_callback_table[cfg] = callback;
-      break;
-    case RegVib :
-      vib_callback_table[cfg] = callback;
-      break;
-    case RegHall :
-      hall_callback_table[cfg] = callback;
-      break;
-    case RegNav :
-      nav_callback_table[cfg] = callback;
-      break;
-    default :
-      break;
-  }
-  //   __sys.sensor[idx]._register(cfg, callback);
-}
-
-/**
- * @fn vib_init
- * @brief vib init
- * @return none
- */
-void vib_init(void) {
-  P2M0 &= ~(1 << 4);
-  P2M1 |= 1 << 4;
-  P2_4 = 1;
-}
 #ifdef USE_RTC
+#include "rtc.h"
 #define __RTC_SECOND_ADDR 0x80
 #define __RTC_MINUTE_ADDR 0x82
 #define __RTC_HOUR_ADDR 0x84
@@ -699,11 +327,11 @@ static uint8_t rtc_read_byte(void) {
   }
   return dat;
 }
-static void write(uint8_t addr, uint8_t dat) {
+static void rtc_addr_write(uint8_t addr, uint8_t dat) {
   rtc_write_byte(__RTC_WRITE(addr));
   rtc_write_byte(dat);
 }
-static uint8_t read(uint8_t addr) {
+static uint8_t rtc_addr_read(uint8_t addr) {
   uint8_t i = 0, dat = 0;
   rtc_write_byte(__RTC_READ(addr));
   for(; i < 8; i++) {
@@ -721,69 +349,422 @@ static uint8_t read(uint8_t addr) {
 }
 void rtc_init(void) {
   RTC_SCLK = 0;
-  // rtc.year = RTC_DEFAULT_YEAR;
-  // rtc.month = RTC_DEFAULT_MONTH;
-  // rtc.day = RTC_DEFAULT_DAY;
-  // rtc.date = RTC_DEFAULT_DATE;
-  // rtc.hour = RTC_DEFAULT_HOUR;
-  // rtc.minute = RTC_DEFAULT_MINUTE;
-  // rtc.second = RTC_DEFAULT_SECOND;
-  // rtc_write();
 }
 void rtc_read(void) {
   uint8_t readval = 0;
   RTC_RST = 1;
-  readval = read(__RTC_SECOND_ADDR);
+  readval = rtc_addr_read(__RTC_SECOND_ADDR);
   rtc.second = ((readval & 0x70) >> 4) * 10 + (readval & 0x0F);
-  readval = read(__RTC_MINUTE_ADDR);
+  readval = rtc_addr_read(__RTC_MINUTE_ADDR);
   rtc.minute = ((readval & 0x70) >> 4) * 10 + (readval & 0x0F);
-  readval = read(__RTC_HOUR_ADDR);
+  readval = rtc_addr_read(__RTC_HOUR_ADDR);
   rtc.hour = ((readval & 0x30) >> 4) * 10 + (readval & 0x0F);
-  readval = read(__RTC_DATE_ADDR);
+  readval = rtc_addr_read(__RTC_DATE_ADDR);
   rtc.date = ((readval & 0x30) >> 4) * 10 + (readval & 0x0F);
-  readval = read(__RTC_DAY_ADDR);
+  readval = rtc_addr_read(__RTC_DAY_ADDR);
   rtc.day = readval & 0x07;
-  readval = read(__RTC_MONTH_ADDR);
+  readval = rtc_addr_read(__RTC_MONTH_ADDR);
   rtc.month = ((readval & 0x10) >> 4) * 10 + (readval & 0x0F);
-  readval = read(__RTC_YEAR_ADDR);
+  readval = rtc_addr_read(__RTC_YEAR_ADDR);
   rtc.year = ((readval & 0xF0) >> 4) * 10 + (readval & 0x0F);
   RTC_RST = 0;
 }
 void rtc_write(void) {
   RTC_RST = 1;
-  write(__RTC_WP_ADDR, 0x00);
-  write(__RTC_SECOND_ADDR, 0x80);
-  write(__RTC_SECOND_ADDR, 0x00 | ((rtc.second / 10) << 4) | (rtc.second % 10));
-  write(__RTC_MINUTE_ADDR, ((rtc.minute / 10) << 4) | (rtc.minute % 10));
-  write(__RTC_HOUR_ADDR, ((rtc.hour / 10) << 4) | (rtc.hour % 10));
-  write(__RTC_DATE_ADDR, ((rtc.date / 10) << 4) | (rtc.date % 10));
-  write(__RTC_DAY_ADDR, rtc.day);
-  write(__RTC_MONTH_ADDR, ((rtc.month / 10) << 4) | (rtc.month % 10));
-  write(__RTC_YEAR_ADDR, ((rtc.year / 10) << 4) | (rtc.year % 10));
-  write(__RTC_WP_ADDR, 0x80);
+  rtc_addr_write(__RTC_WP_ADDR, 0x00);
+  rtc_addr_write(__RTC_SECOND_ADDR, 0x80);
+  rtc_addr_write(__RTC_SECOND_ADDR, 0x00 | ((rtc.second / 10) << 4) | (rtc.second % 10));
+  rtc_addr_write(__RTC_MINUTE_ADDR, ((rtc.minute / 10) << 4) | (rtc.minute % 10));
+  rtc_addr_write(__RTC_HOUR_ADDR, ((rtc.hour / 10) << 4) | (rtc.hour % 10));
+  rtc_addr_write(__RTC_DATE_ADDR, ((rtc.date / 10) << 4) | (rtc.date % 10));
+  rtc_addr_write(__RTC_DAY_ADDR, rtc.day);
+  rtc_addr_write(__RTC_MONTH_ADDR, ((rtc.month / 10) << 4) | (rtc.month % 10));
+  rtc_addr_write(__RTC_YEAR_ADDR, ((rtc.year / 10) << 4) | (rtc.year % 10));
+  rtc_addr_write(__RTC_WP_ADDR, 0x80);
   RTC_RST = 0;
 }
 void rtc_charge(void) {
   RTC_RST = 1;
-  write(__RTC_WP_ADDR, 0x00);
-  write(0x90, 0xA9);
-  write(__RTC_WP_ADDR, 0x80);
+  rtc_addr_write(__RTC_WP_ADDR, 0x00);
+  rtc_addr_write(0x90, 0xA9);
+  rtc_addr_write(__RTC_WP_ADDR, 0x80);
   RTC_RST = 0;
 }
 void rtc_nvm_write(uint8_t addr, uint8_t dat) {
   RTC_RST = 1;
-  write(__RTC_WP_ADDR, 0x00);
-  write((addr << 1) | 0xC0, dat);
-  write(__RTC_WP_ADDR, 0x80);
+  rtc_addr_write(__RTC_WP_ADDR, 0x00);
+  rtc_addr_write((addr << 1) | 0xC0, dat);
+  rtc_addr_write(__RTC_WP_ADDR, 0x80);
   RTC_RST = 0;
 }
 uint8_t rtc_nvm_read(uint8_t addr) {
   uint8_t dat = 0;
   RTC_RST = 1;
-  write(__RTC_WP_ADDR, 0x00);
-  dat = read((addr << 1) | 0xC1);
-  write(__RTC_WP_ADDR, 0x80);
+  rtc_addr_write(__RTC_WP_ADDR, 0x00);
+  dat = rtc_addr_read((addr << 1) | 0xC1);
+  rtc_addr_write(__RTC_WP_ADDR, 0x80);
   RTC_RST = 0;
   return dat;
 }
 #endif
+#ifdef USE_TIMER
+static XDATA sys_callback_t sys_timer_callback_table[3] = {0};
+static XDATA __flag_t sys_timer_flag = 0;  //!< timer flag
+#endif
+#ifdef USE_UART
+#include "uart.h"
+static XDATA uint8_t uart_msg = 0;  //!< uart msg
+static bit uart1_recv_flag = 0;
+static bit uart1_send_flag = 0;
+static bit uart2_recv_flag = 0;
+static bit uart2_send_flag = 0;
+
+typedef struct {
+  uint8_t *buf;
+  uint16_t len;
+  uint16_t idx;
+
+  sys_callback_t callback;
+} uart_cfg_t;
+static XDATA uart_cfg_t uart_cfg[4] = {{0}, {0}, {0}, {0}};
+void uart_cfg_recv(enum UartDev dev, void *buf, uint16_t cnt) {
+  uart_cfg[dev << 1].buf = (uint8_t *)buf;
+  uart_cfg[dev << 1].len = cnt;
+  uart_cfg[dev << 1].idx = 0;
+}
+
+void uart_init(uint8_t cfg) {
+  if(cfg & 0x1) {
+    AUXR &= ~0x1;  // select timer1 as baudrate generator
+    AUXR |= 0x40;  // timer1 divide by 12,timer2 divide by 12
+    PS = 1;        // interrupt priority 1
+    SCON |= 0x50;  // SM0 = 1, SM1 = 0, REN = 1 ,8-bit UART, variable baudrate, receive enable
+    TH1 = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) >> 8;
+    TL1 = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) & 0xFF;  // set baudrate
+    RI = 0;                                                           // clear receive interrupt flag
+    TI = 0;                                                           // clear transmit interrupt flag
+    ES = 1;                                                           // enable serial interrupt
+  }
+  if(cfg & 0x2) {
+    AUXR |= 0x04;   // timer1 divide by 12,timer2 divide by 12
+    IP2 |= 0x1;     // interrupt priority 1
+    S2CON |= 0x10;  // SM0 = 0, REN = 1 ,8-bit UART, variable baudrate, receive enable
+    T2H = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) >> 8;
+    T2L = (65536 - (__sysclk / __UART_DEFAULT_BAUDRATE / 4)) & 0xFF;  // set baudrate
+    S2CON &= ~0x03;
+    IE2 |= 0x1;  // enable serial interrupt
+    P_SW2 |= (cfg >> 2) & 0x1;
+    P3M0 &= ~0x80;
+    P3M1 &= ~0x80;
+    P3_7 = 0x0;  // 485 set receive
+  }
+}
+
+void uart_send(enum UartDev dev, void *buf, uint16_t len) {
+  if(len) {
+    uart_cfg[(dev << 1) + 1].buf = (uint8_t *)buf;
+    uart_cfg[(dev << 1) + 1].len = len;
+    uart_cfg[(dev << 1) + 1].idx = 1;
+    if(dev) {
+      P3_7 = 0x1;
+      S2BUF = uart_cfg[3].buf[0];
+    } else {
+      SBUF = uart_cfg[1].buf[0];
+    }
+  }
+}
+INTERRUPT_USING(__uart1, SI0_VECTOR, 1) {
+  if(RI) {
+    RI = 0;
+    if(uart_cfg[0].len) {
+      if(uart_cfg[0].idx < uart_cfg[0].len) {
+        uart_cfg[0].buf[uart_cfg[0].idx++] = SBUF;
+        if(uart_cfg[0].idx == uart_cfg[0].len) {
+          uart1_recv_flag = 1;
+        }
+      }
+    }
+  }
+  if(TI) {
+    TI = 0;
+    if(uart_cfg[1].idx < uart_cfg[1].len) {
+      SBUF = uart_cfg[1].buf[uart_cfg[1].idx++];
+    } else {
+      uart1_send_flag = 1;
+    }
+  }
+}
+INTERRUPT_USING(__uart2, SI1_VECTOR, 1) {
+  while(S2CON & 0x01) {
+    S2CON &= ~0x01;
+    if(uart_cfg[2].len) {
+      if(uart_cfg[2].idx < uart_cfg[2].len) {
+        uart_cfg[2].buf[uart_cfg[2].idx++] = S2BUF;
+        if(uart_cfg[2].idx == uart_cfg[2].len) {
+          uart2_recv_flag = 1;
+        }
+      }
+    }
+  }
+  while(S2CON & 0x02) {
+    S2CON &= ~0x02;
+    if(uart_cfg[3].idx < uart_cfg[3].len) {
+      S2BUF = uart_cfg[3].buf[uart_cfg[3].idx++];
+    } else {
+      uart2_send_flag = 1;
+      P3_7 = 0x0;
+    }
+  }
+}
+#endif
+#ifdef USE_VIB
+#include "vib.h"
+static XDATA sys_callback_t vib_callback_table[1] = {0};  //!< vib callback table
+static XDATA uint8_t vib_state = 0;                       //!< vib state
+static XDATA __flag_t vib_flag = 0;                       //!< vib flag
+
+/**
+ * @fn vib_init
+ * @brief vib init
+ * @return none
+ */
+void vib_init(void) {
+  P2M0 &= ~(1 << 4);
+  P2M1 |= 1 << 4;
+  P2_4 = 1;
+}
+#endif
+#if defined(USE_KEY) || defined(USE_TIMER)
+uint32_t __sys_timer_cnt = 0;  //!< system timer count
+#endif
+uint32_t __sysclk = 0;  //!< system clock
+/**
+ * @fn sys_init
+ * @brief system init
+ * @param clk
+ * @return none
+ */
+void sys_init(uint32_t clk) {
+  __sysclk = clk;
+  TMOD = 0x00;  // T0和T1都是工作在模式0下,即16位自动重装载模式
+  TH0 = (65535 - __sysclk / 1000) >> 8;
+  TL0 = (65535 - __sysclk / 1000) & 0xff;
+  IE |= 0x02;
+  IP &= ~0x2;
+}
+
+/**
+ * @fn sys_timer
+ * @brief system timer
+ * @return none
+ */
+INTERRUPT(__sys_use_timer, TF0_VECTOR) {
+  static XDATA uint8_t display_index = 0;
+#ifdef USE_ADC
+  uint8_t cur = adcs.nav;
+#define __NAV_NONE 0x7
+  static XDATA uint8_t nav_last_state = __NAV_NONE, nav_cnt = 0;
+  if(cur != __NAV_NONE && nav_last_state == __NAV_NONE) {
+    if(nav_cnt) {
+      --nav_cnt;
+      if(nav_cnt == 0) {
+        nav_flag |= 0x1 | (cur << 1);
+        nav_last_state = cur;
+      }
+    } else {
+      nav_cnt = 5;
+    }
+  } else if(cur == __NAV_NONE && nav_last_state != __NAV_NONE) {
+    nav_flag |= (__FLAG_MASK >> 3) | (nav_last_state << (__FLAG_SIZE - 3));
+    nav_last_state = __NAV_NONE;
+#undef __NAV_NONE
+  }
+#endif
+#ifdef USE_DISPLAY
+  if(display_index < display_end) {
+    if(display_index < 0x8) {
+      P2 = P2 & 0xf8 | display_index;  //__SEG_SEL_SET(display_num_index[display_index]);
+      P0 = 0;                                  //__SEG_SET(0);
+      P2_3 = 0;                                //__SEG_EN();
+      P0 = display_seg[display_index];         //__SEG_SET(display_seg[display_index]);
+    }
+    ++display_index;
+  } else {
+    P0 = 0;            //__LED_SET(0);
+    P2_3 = 1;          //__LED_EN();
+    P0 = display_led;  //__LED_SET(display_led);
+    display_index = display_begin;
+  }
+#endif
+#ifdef USE_HALL
+  if(hall_state != P1_2) {
+    hall_state = P1_2;
+    if(hall_callback_table[hall_state]) {
+      hall_flag |= hall_state | __FLAG_MASK;
+    }
+  }
+#endif
+#ifdef USE_TIMER
+  if((__sys_timer_cnt % 10) == 0) {
+    sys_timer_flag |= 0x1;
+    if((__sys_timer_cnt % 100) == 0) {
+      sys_timer_flag |= 0x2;
+      if((__sys_timer_cnt % 1000) == 0) {
+        sys_timer_flag |= 0x4;
+      }
+    }
+  }
+#endif
+#ifdef USE_VIB
+  if(P2_4 == 0) {  //__GET_VIB()) {
+    if(vib_state == 0) {
+      vib_flag = EventVibStart + 1;
+    }
+    vib_state = 18;
+  } else if(vib_state != 0) {
+    --vib_state;
+  }
+#endif
+#if defined(USE_KEY) || defined(USE_TIMER)
+  ++__sys_timer_cnt;
+#endif
+}
+
+/**
+ * @fn sys_exec
+ * @brief system exec
+ * @param callback
+ * @return none
+ */
+void sys_exec(sys_callback_t callback) {
+  AUXR |= 0x90;  // T0，2工作在1T模式，且T2开始计时
+  IE |= 0x80;
+  // CMOD |= 0x1;
+  TCON |= 0x50;  // timer1 run
+  CR = 1;
+  // TR1 = 0;  // T1
+  // TR0 = 1;  // T0开始计时
+  while(1) {
+    uint8_t i = 0;
+#ifdef USE_ADC
+    if(nav_flag & 0x1) {
+      if(nav_callback_table[nav_flag & ~0x1]) {
+        nav_callback_table[nav_flag & ~0x1]();
+      }
+      nav_flag &= ~0xf;
+    }
+    if(nav_flag & (__FLAG_MASK >> 3)) {
+      if(nav_callback_table[nav_flag >> (__FLAG_SIZE - 4)]) {
+        nav_callback_table[nav_flag >> (__FLAG_SIZE - 4)]();
+      }
+      nav_flag &= ~0xf0;
+    }
+#endif
+#ifdef USE_HALL
+    if(hall_flag) {
+      if(hall_callback_table[hall_flag & ~__FLAG_MASK])
+        hall_callback_table[hall_flag & ~__FLAG_MASK]();
+      hall_flag = 0;
+    }
+#endif
+#ifdef USE_KEY
+    if(key_flag) {
+      i = 0;
+      for(; i < 3; ++i) {
+        if((key_flag << i) & __FLAG_MASK) {
+          key_callback_table[(i << 1) + ((key_flag >> i) & 0x1)]();
+        }
+      }
+      key_flag = 0;
+    }
+#endif
+#ifdef USE_TIMER
+    if(sys_timer_flag) {
+      i = 0;
+      for(; i < 3; ++i) {
+        if(((sys_timer_flag >> i) & 0x1) && sys_timer_callback_table[i]) {
+          sys_timer_callback_table[i]();
+        }
+      }
+      sys_timer_flag = 0;
+    }
+#endif
+#ifdef USE_UART
+    if(uart1_recv_flag) {
+      uart1_recv_flag = 0;
+      if(uart_cfg[0].callback)
+        uart_cfg[0].callback();
+      uart_cfg[0].idx = 0;
+    }
+    if(uart1_send_flag) {
+      uart1_send_flag = 0;
+      if(uart_cfg[1].callback)
+        uart_cfg[1].callback();
+    }
+    if(uart2_recv_flag) {
+      uart2_recv_flag = 0;
+      if(uart_cfg[2].callback)
+        uart_cfg[2].callback();
+      uart_cfg[2].idx = 0;
+    }
+    if(uart2_send_flag) {
+      uart2_send_flag = 0;
+      if(uart_cfg[3].callback)
+        uart_cfg[3].callback();
+    }
+#endif
+#ifdef USE_VIB
+    if(vib_flag) {
+      if(vib_callback_table[vib_flag - 1])
+        vib_callback_table[vib_flag - 1]();
+      vib_flag = 0;
+    }
+#endif
+    if(callback) {
+      callback();
+    }
+  }
+}
+/**
+ * @fn sys_register
+ * @brief register sensor
+ * @param event event type
+ * @param callback callback function
+ * @return none
+ */
+void sys_register(enum RegisterType reg, sys_callback_t callback, uint32_t cfg) {
+  switch(reg) {
+#ifdef USE_UART
+    case RegUart :
+      uart_cfg[cfg].callback = callback;
+      break;
+#endif
+#ifdef USE_TIMER
+    case RegTimer :
+      sys_timer_callback_table[cfg] = callback;
+      break;
+#endif
+#ifdef USE_KEY
+    case RegKey :
+      key_callback_table[cfg] = callback;
+      break;
+#endif
+#ifdef USE_VIB
+    case RegVib :
+      vib_callback_table[cfg] = callback;
+      break;
+#endif
+#ifdef USE_HALL
+    case RegHall :
+      hall_callback_table[cfg] = callback;
+      break;
+#endif
+#ifdef USE_ADC
+    case RegNav :
+      nav_callback_table[cfg] = callback;
+      break;
+#endif
+    default :
+      break;
+  }
+}
