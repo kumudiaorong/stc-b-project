@@ -17,8 +17,9 @@ extern void _nop_(void);
 
 #elif defined(__SDCC) || defined(SDCC)
 #define XDATA __xdata
+#define CODE __code
 #define REENTRANT __reentrant
-
+#define bit __bit
 #define SBIT(name, addr, bit) __sbit __at(addr + bit) name
 #define SFR(name, addr) __sfr __at(addr) name
 #define INTERRUPT(name, vector) void name(void) __interrupt(vector)

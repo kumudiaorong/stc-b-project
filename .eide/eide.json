@@ -20,7 +20,7 @@
       "excludeList": [
         "src/add.c"
       ],
-      "toolchain": "Keil_C51",
+      "toolchain": "SDCC",
       "compileConfig": {
         "options": "null"
       },
