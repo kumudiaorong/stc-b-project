@@ -5,7 +5,7 @@
 // #define TEST_TIMER
 // #define TEST_VIB_HALL_KEY_ADC
 // #define TEST_RTC_NVM
-// #define TEST_BEEP
+#define TEST_BEEP
 #ifdef TEST_UART
 #include "sys.h"
 #include "uart.h"
@@ -289,9 +289,9 @@ void main(void) {
   sys_exec(0);
 }
 #elif defined(TEST_BEEP)
-#include "adc.h"
+// #include "adc.h"
 #include "beep.h"
-#include "display.h"
+// #include "display.h"
 #include "key.h"
 #include "sys.h"
 
@@ -299,40 +299,193 @@ void key1_press_test(void) {
   static bit flag = 0;
   if(flag) {
     flag = 0;
-    beep_off();
-    display_led &= 0x7f;
+    beep_on();
+    // beep_off();
+    // display_led &= 0x7f;
   } else {
     flag = 1;
-    beep_on();
-    display_led |= 0x80;
+    // beep_on();
+    // display_led |= 0x80;
+    CCAPM0 &= ~0x01;
+    P3_4 = 0;  // pull voltage to low to protect buzzer
   }
 }
-void nav_up_press_test(void) {
-  freq += 10;
-  display_seg[4] = display_num_decoding[freq / 1000];
-  display_seg[5] = display_num_decoding[(freq / 100) % 10];
-  display_seg[6] = display_num_decoding[(freq / 10) % 10];
-  display_seg[7] = display_num_decoding[freq % 10];
-}
-void nav_down_press_test(void) {
-  freq -= 10;
-  display_seg[4] = display_num_decoding[freq / 1000];
-  display_seg[5] = display_num_decoding[(freq / 100) % 10];
-  display_seg[6] = display_num_decoding[(freq / 10) % 10];
-  display_seg[7] = display_num_decoding[freq % 10];
-}
+// void nav_up_press_test(void) {
+//   freq += 10;
+//   display_seg[4] = display_num_decoding[freq / 1000];
+//   display_seg[5] = display_num_decoding[(freq / 100) % 10];
+//   display_seg[6] = display_num_decoding[(freq / 10) % 10];
+//   display_seg[7] = display_num_decoding[freq % 10];
+// }
+// void nav_down_press_test(void) {
+//   freq -= 10;
+//   display_seg[4] = display_num_decoding[freq / 1000];
+//   display_seg[5] = display_num_decoding[(freq / 100) % 10];
+//   display_seg[6] = display_num_decoding[(freq / 10) % 10];
+//   display_seg[7] = display_num_decoding[freq % 10];
+// }
 void main(void) {
-  sys_init(27000000);
+  sys_init(11059200);
   key_init();
-  adc_init();
+  // adc_init();
   beep_init();
-  display_init();
-  display_area(0, 8);
+  // display_init();
+  // display_area(0, 8);
   sys_register(RegKey, key1_press_test, CONKEY(DevKey1, EventKeyPress));
-  sys_register(RegNav, nav_up_press_test, CONNAV(DevNavUp, EventNavPress));
-  sys_register(RegNav, nav_down_press_test, CONNAV(DevNavDown, EventNavPress));
+  // sys_register(RegNav, nav_up_press_test, CONNAV(DevNavUp, EventNavPress));
+  // sys_register(RegNav, nav_down_press_test, CONNAV(DevNavDown, EventNavPress));
   sys_exec(0);
 }
+#else
+#include "display.h"
+#include "sys.h"
+
+uint8_t U8T_data_H_temp, U8T_data_L_temp, U8RH_data_H_temp, U8RH_data_L_temp, U8checkdata_temp, U8comdata;
+uint8_t buf[5];
+static bit over = 0;
+static uint8_t cnt = 0, U8FLAG = 0;
+void _10ms(void) {
+  if(cnt == 0) {
+    over = 1;
+  } else {
+    --cnt;
+  }
+}
+void Delay10ms()  //@11.0592MHz
+{
+  unsigned char data i, j;
+
+  i = 108;
+  j = 145;
+  do {
+    while(--j)
+      ;
+  } while(--i);
+}
+void Delay_10us(void) {
+  unsigned char data i;
+  _nop_();
+  i = 25;
+  while(--i)
+    ;
+}
+void Delay70us()  //@11.0592MHz
+{
+  unsigned char data i;
+
+  i = 191;
+  while(--i)
+    ;
+}
+void Delay50us()  //@11.0592MHz
+{
+  unsigned char data i;
+
+  _nop_();
+  _nop_();
+  _nop_();
+  i = 135;
+  while(--i)
+    ;
+}
+void COM(void) {
+  uint8_t i;
+
+  for(i = 0; i < 8; i++) {
+    while(P1_0)
+      ;
+    while(!P1_0)
+      ;
+    Delay_10us();
+    Delay_10us();
+    Delay_10us();
+    Delay_10us();
+    Delay_10us();
+    U8comdata <<= 1;
+    if(P1_0) {
+      U8comdata |= 1;  // 0
+    };
+  }  // rof
+}
+uint8_t modecnt = 0;
+void RH(void) {
+  // 主机拉低18ms
+  P1_0 = 0;
+  Delay10ms();
+  Delay10ms();
+  P1_0 = 1;
+  // 总线由上拉电阻拉高 主机延时20us
+  Delay_10us();
+  Delay_10us();
+  Delay_10us();
+  // 主机设为输入 判断从机响应信号
+  // P1_0 = 1;
+  // 判断从机是否有低电平响应信号 如不响应则跳出，响应则向下运行
+  if(!P1_0)  // T !
+  {
+    // uart_send(DevUART1, "3", 1);
+    display_seg[7] = display_num_decoding[modecnt];
+    modecnt = (modecnt + 1) % 10;
+    // 判断从机是否发出 80us 的低电平响应信号是否结束
+    while(!P1_0)
+      ;
+    Delay50us();
+    // 判断从机是否发出 80us 的高电平，如发出则进入数据接收状态
+    // 数据接收状态
+    COM();
+    buf[0] = U8comdata;
+    // COM();
+    // buf[1] = U8comdata;
+    // COM();
+    // buf[2] = U8comdata;
+    // COM();
+    // buf[3] = U8comdata;
+    // COM();
+    // buf[4] = U8comdata;
+    // P1_0 = 1;
+    // 数据校验
+    // if(buf[0] + buf[1] + buf[2] + buf[3] == buf[4]) {
+    display_seg[0] = display_num_decoding[buf[0] / 10];
+    display_seg[1] = display_num_decoding[buf[0] % 10];
+    //   display_seg[3] = display_num_decoding[buf[2] / 10];
+    //   display_seg[4] = display_num_decoding[buf[2] % 10];
+    // uart_send(DevUART1, buf, 4);
+    // }  //   U8temp = (U8T_data_H_temp + U8T_data_L_temp + U8RH_data_H_temp + U8RH_data_L_temp);
+    //   if(U8temp == U8checkdata_temp) {
+    //     U8RH_data_H = U8RH_data_H_temp;
+    //     U8RH_data_L = U8RH_data_L_temp;
+    //     U8T_data_H = U8T_data_H_temp;
+    //     U8T_data_L = U8T_data_L_temp;
+    //     U8checkdata = U8checkdata_temp;
+    // }  // fi
+  }  // fi
+}
+void _1s(void) {
+  // uart_send(DevUART1, "Hello World!\r\n", 14);
+  static uint8_t mode = 0;
+  if(mode == 1) {
+    RH();
+    mode = 0;
+  } else {
+    ++mode;
+  }
+}
+void main(void) {
+  sys_init(11059200);
+  display_init();
+  display_area(0, 8);
+  for(modecnt = 0; modecnt < 8; modecnt++) {
+    display_seg[modecnt] = 0;
+  }
+  display_seg[2] = 0x40;
+  display_seg[5] = 0x40;
+  sys_register(RegTimer, _10ms, EventTimer10ms);
+  sys_register(RegTimer, _1s, EventTimer1S);
+  // RH();
+
+  sys_exec(0);
+}
+
 #endif
 #elif TEST == 1
 #include "sys.h"

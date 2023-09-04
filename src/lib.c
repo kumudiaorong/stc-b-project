@@ -1,17 +1,16 @@
 #include "def.h"
-#include "detail/sys.h"
 #include "sys.h"
 
-#define USE_ADC
-// #define USE_BEEP
-#define USE_DISPLAY
-#define USE_HALL
+// #define USE_ADC
+#define USE_BEEP
+// #define USE_DISPLAY
+// #define USE_HALL
 #define USE_KEY
-#define USE_NVM
-#define USE_RTC
-#define USE_TIMER
-#define USE_UART
-#define USE_VIB
+// #define USE_NVM
+// #define USE_RTC
+// #define USE_TIMER
+// #define USE_UART
+// #define USE_VIB
 
 typedef uint8_t __flag_t;
 #define __FLAG_MASK (0x1 << ((sizeof(__flag_t) << 3) - 1))
@@ -111,7 +110,6 @@ INTERRUPT_USING(__beep, __BEEP_VECTOR, 1) {
   CCAP0L = beep_sum & 0xff;
   beep_sum += __sysclk / 24 / freq;
   P3_4 = !P3_4;  // make buzzer sound
-  display_led = !display_led;
   // tmp = CCAP1L;
 }
 #endif
