@@ -5,7 +5,7 @@
 // #define TEST_TIMER
 // #define TEST_VIB_HALL_KEY_ADC
 // #define TEST_RTC_NVM
-#define TEST_BEEP
+// #define TEST_BEEP
 #ifdef TEST_UART
 #include "sys.h"
 #include "uart.h"

@@ -1,21 +1,14 @@
 #include "def.h"
 #include "sys.h"
-
-// #define USE_ADC
-#define USE_BEEP
-// #define USE_DISPLAY
-// #define USE_HALL
-#define USE_KEY
-// #define USE_NVM
-// #define USE_RTC
-// #define USE_TIMER
-// #define USE_UART
-// #define USE_VIB
+#include "use.h"
 
 typedef uint8_t __flag_t;
 #define __FLAG_MASK (0x1 << ((sizeof(__flag_t) << 3) - 1))
 #define __FLAG_SIZE sizeof(__flag_t)
-
+uint32_t __sysclk = 0;  //!< system clock
+#if defined(USE_KEY) || defined(USE_TIMER)
+uint32_t __sys_timer_cnt = 0;  //!< system timer count
+#endif
 #ifdef USE_ADC
 #include "adc.h"
 static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 116, 113, 109, 107, 104, 101, 99, 97,
@@ -449,7 +442,10 @@ void uart_init(uint8_t cfg) {
   }
 }
 
-void uart_send(enum UartDev dev, void *buf, uint16_t len) {
+uint8_t uart_send(enum UartDev dev, void *buf, uint16_t len) {
+  if(uart_cfg[(dev << 1) + 1].idx == uart_cfg[(dev << 1) + 1].len) {
+    return EventUartBusy;
+  }
   if(len) {
     uart_cfg[(dev << 1) + 1].buf = (uint8_t *)buf;
     uart_cfg[(dev << 1) + 1].len = len;
@@ -461,6 +457,7 @@ void uart_send(enum UartDev dev, void *buf, uint16_t len) {
       SBUF = uart_cfg[1].buf[0];
     }
   }
+  return 0;
 }
 INTERRUPT_USING(__uart1, SI0_VECTOR, 1) {
   if(RI) {
@@ -523,10 +520,7 @@ void vib_init(void) {
   P2_4 = 1;
 }
 #endif
-#if defined(USE_KEY) || defined(USE_TIMER)
-uint32_t __sys_timer_cnt = 0;  //!< system timer count
-#endif
-uint32_t __sysclk = 0;  //!< system clock
+
 /**
  * @fn sys_init
  * @brief system init
