@@ -3,7 +3,7 @@
 // #define TEST_UART
 // #define TEST_DISPLAY
 // #define TEST_TIMER
-// #define TEST_VIB_HALL_KEY_ADC
+#define TEST_VIB_HALL_KEY_ADC
 // #define TEST_RTC_NVM
 // #define TEST_BEEP
 #ifdef TEST_UART
@@ -181,7 +181,6 @@ void main(void) {
   adc_init();
   display_init();
   display_area(0, 8);
-  display_base = DISPLAY_BASE_HEX;
   sys_register(RegTimer, _100ms_test, EventTimer100ms);
   sys_register(RegKey, key1_press_test, CONKEY(DevKey1, EventKeyPress));
   sys_register(RegKey, key1_release_test, CONKEY(DevKey1, EventKeyReleas));

@@ -11,17 +11,17 @@ uint32_t __sys_timer_cnt = 0;  //!< system timer count
 #endif
 #ifdef USE_ADC
 #include "adc.h"
-static int8_t CODE __d2t[] = {239, 197, 175, 160, 150, 142, 135, 129, 124, 120, 116, 113, 109, 107, 104, 101, 99, 97,
-  95, 93, 91, 90, 88, 86, 85, 84, 82, 81, 80, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 67, 66, 65, 64, 63, 63,
-  62, 61, 61, 60, 59, 58, 58, 57, 57, 56, 55, 55, 54, 54, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48, 48, 47, 47, 46, 46,
-  45, 45, 44, 44, 43, 43, 42, 42, 41, 41, 41, 40, 40, 39, 39, 38, 38, 38, 37, 37, 36, 36, 36, 35, 35, 34, 34, 34, 33,
-  33, 32, 32, 32, 31, 31, 31, 30, 30, 29, 29, 29, 28, 28, 28, 27, 27, 27, 26, 26, 26, 25, 25, 24, 24, 24, 23, 23, 23,
-  22, 22, 22, 21, 21, 21, 20, 20, 20, 19, 19, 19, 18, 18, 18, 17, 17, 16, 16, 16, 15, 15, 15, 14, 14, 14, 13, 13, 13,
-  12, 12, 12, 11, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 5, 5, 54, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, -1, -1,
-  -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6, -7, -7, -8, -8, -9, -9, -10, -10, -11, -11, -12, -13, -13, -14, -14, -15,
-  -16, -16, -17, -18, -19, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38,
-  -40};                  //!< adc temperature table
-XDATA adc_t adcs = {0};  //!< adc data
+//index+6
+static int8_t CODE __d2t[] = {124, 120, 116, 113, 109, 107, 104, 101, 99, 97, 95, 93, 91, 90, 88, 86, 85, 84, 82, 81,
+  80, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 67, 66, 65, 64, 63, 63, 62, 61, 61, 60, 59, 58, 58, 57, 57, 56,
+  55, 55, 54, 54, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48, 48, 47, 47, 46, 46, 45, 45, 44, 44, 43, 43, 42, 42, 41, 41,
+  41, 40, 40, 39, 39, 38, 38, 38, 37, 37, 36, 36, 36, 35, 35, 34, 34, 34, 33, 33, 32, 32, 32, 31, 31, 31, 30, 30, 29,
+  29, 29, 28, 28, 28, 27, 27, 27, 26, 26, 26, 25, 25, 24, 24, 24, 23, 23, 23, 22, 22, 22, 21, 21, 21, 20, 20, 20, 19,
+  19, 19, 18, 18, 18, 17, 17, 16, 16, 16, 15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 9, 9, 9,
+  8, 8, 8, 7, 7, 7, 6, 6, 5, 5, 54, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, -1, -1, -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6,
+  -7, -7, -8, -8, -9, -9, -10, -10, -11, -11, -12, -13, -13, -14, -14, -15, -16, -16, -17, -18, -19, -19, -20, -21, -22,
+  -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38, -40};  //!< adc temperature table
+XDATA adc_t adcs = {0};                                                   //!< adc data
 /**
  * @fn adc_init
  * @brief adc init
@@ -167,17 +167,17 @@ static XDATA uint8_t key_states = 0;  //!< key states,bit 0-2 for key1-3, 1 for 
  * @brief key interrupt function
  * @return none
  */
-#define __KEY_BY_INT(idx, vec)                                           \
-  INTERRUPT(__key##idx, vec) {                                           \
-    static uint32_t lastT = 0;                                           \
-    if(!lastT || __sys_timer_cnt - lastT > 20) {                         \
-      if(key_callback_table[(idx << 1) + ((key_states >> idx) & 0x1)]) { \
-        key_flag |= (__FLAG_MASK >> idx) | (key_states & (1 << idx));    \
-      }                                                                  \
-      key_states ^= 1 << idx;                                            \
-    }                                                                    \
-    lastT = __sys_timer_cnt;                                             \
-  }
+#define __KEY_BY_INT(idx, vec)                                     \
+INTERRUPT(__key##idx, vec) {                                       \
+static uint32_t lastT = 0;                                         \
+if(!lastT || __sys_timer_cnt - lastT > 20) {                       \
+if(key_callback_table[(idx << 1) + ((key_states >> idx) & 0x1)]) { \
+key_flag |= (__FLAG_MASK >> idx) | (key_states & (1 << idx));      \
+}                                                                  \
+key_states ^= 1 << idx;                                            \
+}                                                                  \
+lastT = __sys_timer_cnt;                                           \
+}
 __KEY_BY_INT(0, IE0_VECTOR)
 __KEY_BY_INT(1, IE1_VECTOR)
 #undef __KEY_BY_INT
@@ -231,11 +231,11 @@ static uint8_t nvm_iic_recv_ack(void) {
   return i < 250 ? 1 : 0;
 }
 #define __ASSERT_STOP(expr, ret) \
-  if(!(expr)) {                  \
-    nvm_iic_stop();              \
-    errno_nvm = 1;               \
-    return ret;                  \
-  }
+if(!(expr)) {                    \
+nvm_iic_stop();                  \
+errno_nvm = 1;                   \
+return ret;                      \
+}
 void nvm_write(uint8_t addr, uint8_t dat) {
   uint8_t i = 0;
   nvm_iic_start();
@@ -730,10 +730,10 @@ void sys_register(enum RegisterType reg, sys_callback_t callback, uint32_t cfg) 
       uart_cfg[cfg].callback = callback;
       break;
 #endif
-#define REG_CASE(Case, Name)               \
-  case Case :                              \
-    Name##_callback_table[cfg] = callback; \
-    break;
+#define REG_CASE(Case, Name)           \
+case Case :                            \
+Name##_callback_table[cfg] = callback; \
+break;
 #ifdef USE_TIMER
       REG_CASE(RegTimer, sys_timer)
 #endif
