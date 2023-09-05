@@ -303,7 +303,7 @@ StatementMacros:
 - Q_UNUSED
 - QT_REQUIRE_VERSION
 # tab宽度
-TabWidth: 8
+TabWidth: 2
 # 使用\r\n换行替代\n
 UseCRLF: false
 # 使用tab字符：ForIndentation——仅将制表符用于缩进
