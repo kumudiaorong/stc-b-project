@@ -4,7 +4,8 @@
   "dependenceList": [],
   "srcDirs": [
     "src",
-    "c51"
+    "test",
+    "inc"
   ],
   "outDir": "build",
   "virtualFolder": {
@@ -24,13 +25,26 @@
       "compileConfig": {
         "options": "null"
       },
-      "uploader": "Custom",
+      "uploader": "stcgal",
       "uploadConfig": {
         "bin": "",
-        "commandLine": "python ./tools/stcflash.py -p ${port} \"${hexFile}\"",
-        "eraseChipCommand": ""
+        "eepromImgPath": "null",
+        "extraOptions": "",
+        "options": ".eide/stc.flash.json"
       },
-      "uploadConfigMap": {},
+      "uploadConfigMap": {
+        "Custom": {
+          "bin": "",
+          "commandLine": "python ./tools/stcflash.py -p ${port} \"${programFile}\"",
+          "eraseChipCommand": ""
+        },
+        "stcgal": {
+          "bin": "",
+          "eepromImgPath": "null",
+          "extraOptions": "",
+          "options": ".eide/stc.flash.json"
+        }
+      },
       "custom_dep": {
         "name": "default",
         "incList": [],
