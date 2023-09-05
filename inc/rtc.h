@@ -4,13 +4,6 @@
 // sbit RTC_sclk=P1^5;//时钟控制引脚，控制数据的输入输出
 // sbit RTC_rst=P1^6;//CE引脚，读写时必须置高电平
 // sbit RTC_io=P5^4;//数据引脚
-#define RTC_DEFAULT_YEAR 23
-#define RTC_DEFAULT_DAY 01
-#define RTC_DEFAULT_MONTH 12
-#define RTC_DEFAULT_DATE 31
-#define RTC_DEFAULT_HOUR 23
-#define RTC_DEFAULT_MINUTE 59
-#define RTC_DEFAULT_SECOND 50
 typedef struct {
   uint8_t year;
   uint8_t month;
