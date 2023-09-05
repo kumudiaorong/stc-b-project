@@ -1,9 +1,9 @@
 #define TEST 0
 #if TEST == 0
-// #define TEST_UART
+#define TEST_UART
 // #define TEST_DISPLAY
 // #define TEST_TIMER
-#define TEST_VIB_HALL_KEY_ADC
+// #define TEST_VIB_HALL_KEY_ADC
 // #define TEST_RTC_NVM
 // #define TEST_BEEP
 #ifdef TEST_UART

@@ -4,7 +4,8 @@
   "dependenceList": [],
   "srcDirs": [
     "src",
-    "c51"
+    "test",
+    "inc"
   ],
   "outDir": "build",
   "virtualFolder": {
@@ -20,7 +21,7 @@
       "excludeList": [
         "src/add.c"
       ],
-      "toolchain": "SDCC",
+      "toolchain": "Keil_C51",
       "compileConfig": {
         "options": "null"
       },

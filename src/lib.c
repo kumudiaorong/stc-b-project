@@ -11,7 +11,7 @@ uint32_t __sys_timer_cnt = 0;  //!< system timer count
 #endif
 #ifdef USE_ADC
 #include "adc.h"
-//index+6
+// index+6
 static int8_t CODE __d2t[] = {124, 120, 116, 113, 109, 107, 104, 101, 99, 97, 95, 93, 91, 90, 88, 86, 85, 84, 82, 81,
   80, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 67, 66, 65, 64, 63, 63, 62, 61, 61, 60, 59, 58, 58, 57, 57, 56,
   55, 55, 54, 54, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48, 48, 47, 47, 46, 46, 45, 45, 44, 44, 43, 43, 42, 42, 41, 41,
@@ -167,17 +167,17 @@ static XDATA uint8_t key_states = 0;  //!< key states,bit 0-2 for key1-3, 1 for 
  * @brief key interrupt function
  * @return none
  */
-#define __KEY_BY_INT(idx, vec)                                     \
-INTERRUPT(__key##idx, vec) {                                       \
-static uint32_t lastT = 0;                                         \
-if(!lastT || __sys_timer_cnt - lastT > 20) {                       \
-if(key_callback_table[(idx << 1) + ((key_states >> idx) & 0x1)]) { \
-key_flag |= (__FLAG_MASK >> idx) | (key_states & (1 << idx));      \
-}                                                                  \
-key_states ^= 1 << idx;                                            \
-}                                                                  \
-lastT = __sys_timer_cnt;                                           \
-}
+#define __KEY_BY_INT(idx, vec)                                           \
+  INTERRUPT(__key##idx, vec) {                                           \
+    static uint32_t lastT = 0;                                           \
+    if(!lastT || __sys_timer_cnt - lastT > 20) {                         \
+      if(key_callback_table[(idx << 1) + ((key_states >> idx) & 0x1)]) { \
+        key_flag |= (__FLAG_MASK >> idx) | (key_states & (1 << idx));    \
+      }                                                                  \
+      key_states ^= 1 << idx;                                            \
+    }                                                                    \
+    lastT = __sys_timer_cnt;                                             \
+  }
 __KEY_BY_INT(0, IE0_VECTOR)
 __KEY_BY_INT(1, IE1_VECTOR)
 #undef __KEY_BY_INT
@@ -231,11 +231,11 @@ static uint8_t nvm_iic_recv_ack(void) {
   return i < 250 ? 1 : 0;
 }
 #define __ASSERT_STOP(expr, ret) \
-if(!(expr)) {                    \
-nvm_iic_stop();                  \
-errno_nvm = 1;                   \
-return ret;                      \
-}
+  if(!(expr)) {                  \
+    nvm_iic_stop();              \
+    errno_nvm = 1;               \
+    return ret;                  \
+  }
 void nvm_write(uint8_t addr, uint8_t dat) {
   uint8_t i = 0;
   nvm_iic_start();
@@ -395,7 +395,6 @@ static XDATA __flag_t sys_timer_flag = 0;  //!< timer flag
 #endif
 #ifdef USE_UART
 #include "uart.h"
-static XDATA uint8_t uart_msg = 0;  //!< uart msg
 static bit uart1_recv_flag = 0;
 static bit uart1_send_flag = 0;
 static bit uart2_recv_flag = 0;
@@ -442,10 +441,7 @@ void uart_init(uint8_t cfg) {
   }
 }
 
-uint8_t uart_send(enum UartDev dev, void *buf, uint16_t len) {
-  if(uart_cfg[(dev << 1) + 1].idx == uart_cfg[(dev << 1) + 1].len) {
-    return EventUartBusy;
-  }
+void uart_send(enum UartDev dev, void *buf, uint16_t len) {
   if(len) {
     uart_cfg[(dev << 1) + 1].buf = (uint8_t *)buf;
     uart_cfg[(dev << 1) + 1].len = len;
@@ -457,7 +453,6 @@ uint8_t uart_send(enum UartDev dev, void *buf, uint16_t len) {
       SBUF = uart_cfg[1].buf[0];
     }
   }
-  return 0;
 }
 INTERRUPT_USING(__uart1, SI0_VECTOR, 1) {
   if(RI) {
@@ -683,9 +678,9 @@ void sys_exec(sys_callback_t callback) {
 #ifdef USE_UART
     if(uart1_recv_flag) {
       uart1_recv_flag = 0;
+      uart_cfg[0].idx = 0;
       if(uart_cfg[0].callback)
         uart_cfg[0].callback();
-      uart_cfg[0].idx = 0;
     }
     if(uart1_send_flag) {
       uart1_send_flag = 0;
@@ -694,9 +689,9 @@ void sys_exec(sys_callback_t callback) {
     }
     if(uart2_recv_flag) {
       uart2_recv_flag = 0;
+      uart_cfg[2].idx = 0;
       if(uart_cfg[2].callback)
         uart_cfg[2].callback();
-      uart_cfg[2].idx = 0;
     }
     if(uart2_send_flag) {
       uart2_send_flag = 0;
@@ -730,10 +725,10 @@ void sys_register(enum RegisterType reg, sys_callback_t callback, uint32_t cfg) 
       uart_cfg[cfg].callback = callback;
       break;
 #endif
-#define REG_CASE(Case, Name)           \
-case Case :                            \
-Name##_callback_table[cfg] = callback; \
-break;
+#define REG_CASE(Case, Name)               \
+  case Case :                              \
+    Name##_callback_table[cfg] = callback; \
+    break;
 #ifdef USE_TIMER
       REG_CASE(RegTimer, sys_timer)
 #endif
