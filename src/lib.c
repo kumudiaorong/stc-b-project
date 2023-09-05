@@ -3,7 +3,7 @@
 #include "use.h"
 
 typedef uint8_t __flag_t;
-#define __FLAG_MASK (0x1 << ((sizeof(__flag_t) << 3) - 1))
+#define __FLAG_MASK 0x80
 #define __FLAG_SIZE sizeof(__flag_t)
 uint32_t __sysclk = 0;  //!< system clock
 
@@ -560,7 +560,7 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
       nav_cnt = 5;
     }
   } else if(cur == __NAV_NONE && nav_last_state != __NAV_NONE) {
-    nav_flag |= (__FLAG_MASK >> 3) | (nav_last_state << (__FLAG_SIZE - 3));
+    nav_flag |= (__FLAG_MASK >> 3) | (nav_last_state << 5);
     nav_last_state = __NAV_NONE;
 #undef __NAV_NONE
   }
@@ -635,16 +635,18 @@ void sys_exec(sys_callback_t callback) {
     uint8_t i = 0;
 #ifdef USE_ADC
     if(nav_flag & 0x1) {
-      if(nav_callback_table[nav_flag & ~0x1]) {
-        nav_callback_table[nav_flag & ~0x1]();
-      }
+      i = (nav_flag & ~0x1) & 0xf;
       nav_flag &= ~0xf;
+      if(nav_callback_table[i]) {
+        nav_callback_table[i]();
+      }
     }
     if(nav_flag & (__FLAG_MASK >> 3)) {
-      if(nav_callback_table[nav_flag >> (__FLAG_SIZE - 4)]) {
-        nav_callback_table[nav_flag >> (__FLAG_SIZE - 4)]();
-      }
+      i = nav_flag >> 4;
       nav_flag &= ~0xf0;
+      if(nav_callback_table[i]) {
+        nav_callback_table[i]();
+      }
     }
 #endif
 #ifdef USE_HALL
