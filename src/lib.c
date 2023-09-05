@@ -6,6 +6,7 @@ typedef uint8_t __flag_t;
 #define __FLAG_MASK (0x1 << ((sizeof(__flag_t) << 3) - 1))
 #define __FLAG_SIZE sizeof(__flag_t)
 uint32_t __sysclk = 0;  //!< system clock
+
 #if defined(USE_KEY) || defined(USE_TIMER)
 uint32_t __sys_timer_cnt = 0;  //!< system timer count
 #endif
