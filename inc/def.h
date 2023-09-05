@@ -70,6 +70,7 @@ SBIT(P3_7, 0xB0, 7);
 
 SFR(P4, 0xC0);
 SBIT(P4_0, 0xC0, 0);
+SBIT(P4_1, 0xC0, 1);
 
 SFR(P5, 0xC8);
 SBIT(P5_5, 0xC8, 5);
@@ -96,6 +97,8 @@ SFR(P2M0, 0x96);
 SFR(P2M1, 0x95);
 SFR(P3M0, 0xB2);
 SFR(P3M1, 0xB1);
+SFR(P4M0, 0xB4);
+SFR(P4M1, 0xB3);
 
 SFR(IE, 0xA8);
 SBIT(EA, 0xA8, 7);

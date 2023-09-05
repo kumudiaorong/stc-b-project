@@ -106,12 +106,12 @@ void main(void) {
 
 static uint32_t cnt = 0;
 void _100ms_test(void) {
-  display_seg[0] = display_num_decoding[adcs.rop / 100];
-  display_seg[1] = display_num_decoding[(adcs.rop / 10) % 10];
-  display_seg[2] = display_num_decoding[adcs.rop % 10];
+  display_seg[0] = display_num_decoding[adc.rop / 100];
+  display_seg[1] = display_num_decoding[(adc.rop / 10) % 10];
+  display_seg[2] = display_num_decoding[adc.rop % 10];
   display_seg[3] = 0x40;
-  display_seg[4] = display_num_decoding[adcs.rt / 10];
-  display_seg[5] = display_num_decoding[adcs.rt % 10];
+  display_seg[4] = display_num_decoding[adc.rt / 10];
+  display_seg[5] = display_num_decoding[adc.rt % 10];
   display_seg[6] = 0x40;
   cnt &= 0xf;
   display_seg[7] = display_num_decoding[cnt];
@@ -289,7 +289,7 @@ void main(void) {
 }
 #elif defined(TEST_BEEP)
 // #include "adc.h"
-#include "beep.h"
+// #include "beep.h"
 // #include "display.h"
 #include "key.h"
 #include "sys.h"
@@ -298,7 +298,7 @@ void key1_press_test(void) {
   static bit flag = 0;
   if(flag) {
     flag = 0;
-    beep_on();
+    // beep_on();
     // beep_off();
     // display_led &= 0x7f;
   } else {
@@ -327,7 +327,7 @@ void main(void) {
   sys_init(11059200);
   key_init();
   // adc_init();
-  beep_init();
+  // beep_init();
   // display_init();
   // display_area(0, 8);
   sys_register(RegKey, key1_press_test, CONKEY(DevKey1, EventKeyPress));
@@ -587,8 +587,8 @@ void main(void) {
 #include "sys.h"
 
 void _100ms_test(void) {
-  display_seg[0] = display_num_decoding[adcs.rt % 10];
-  display_seg[1] = display_num_decoding[adcs.rt / 10];
+  display_seg[0] = display_num_decoding[adc.rt % 10];
+  display_seg[1] = display_num_decoding[adc.rt / 10];
 }
 void main(void) {
   sys_init(27000000);

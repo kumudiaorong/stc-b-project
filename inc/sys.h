@@ -3,13 +3,9 @@
 #include "def.h"
 typedef void (*sys_callback_t)(void);
 
-#define CONEVENT(sys, dri) ((sys << 4) | dri)
 enum RegisterType { RegUart, RegKey, RegHall, RegNav, RegVib, RegBeep, RegRtc, RegNvm, RegTimer, RegSys };
 enum TimerEvent { EventTimer10ms, EventTimer100ms, EventTimer1S };
 void sys_init(uint32_t sysclk);
-void sys_register(uint8_t idx, sys_callback_t callback, uint32_t cfg);
-void sys_exec(sys_callback_t callback);
-extern uint32_t sys_cnt;
-// void sys_set(uint32_t msg);
-// void led_test(uint8_t msg);
+void sys_register(uint8_t reg, sys_callback_t callback, uint32_t cfg);
+void sys_exec();
 #endif

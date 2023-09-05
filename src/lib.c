@@ -22,7 +22,7 @@ static int8_t CODE __d2t[] = {124, 120, 116, 113, 109, 107, 104, 101, 99, 97, 95
   8, 8, 8, 7, 7, 7, 6, 6, 5, 5, 54, 4, 3, 3, 3, 2, 2, 1, 1, 1, 0, 0, -1, -1, -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6,
   -7, -7, -8, -8, -9, -9, -10, -10, -11, -11, -12, -13, -13, -14, -14, -15, -16, -16, -17, -18, -19, -19, -20, -21, -22,
   -23, -24, -25, -26, -27, -28, -29, -30, -32, -33, -35, -36, -38, -40};  //!< adc temperature table
-XDATA adc_t adcs = {0};                                                   //!< adc data
+XDATA adc_t adc = {0};                                                    //!< adc data
 /**
  * @fn adc_init
  * @brief adc init
@@ -48,15 +48,15 @@ INTERRUPT_USING(__adc, 5, 1) {
   if(count == __ADC_AVG_CNT) {
     switch(curchannel) {
       case 0x3 :  // rt channel
-        adcs.rt = __d2t[(((sum + (__ADC_AVG_CNT >> 1)) / __ADC_AVG_CNT) >> 2) - 1];
+        adc.rt = __d2t[(((sum + (__ADC_AVG_CNT >> 1)) / __ADC_AVG_CNT) >> 2) - 1];
         curchannel = 0x4;  // rop channel
         break;
       case 0x4 :  // rop channel
-        adcs.rop = (sum + (__ADC_AVG_CNT >> 1)) / __ADC_AVG_CNT;
+        adc.rop = (sum + (__ADC_AVG_CNT >> 1)) / __ADC_AVG_CNT;
         curchannel = 0x7;  // nav channel
         break;
       case 0x7 :  // nav channel
-        adcs.nav = ((sum + (__ADC_AVG_CNT >> 1)) / __ADC_AVG_CNT) >> 7;
+        adc.nav = ((sum + (__ADC_AVG_CNT >> 1)) / __ADC_AVG_CNT) >> 7;
 #undef __ADC_AVG_CNT
         curchannel = 0x3;  // rt channel
         break;
@@ -503,7 +503,7 @@ INTERRUPT_USING(__uart2, SI1_VECTOR, 1) {
 #include "vib.h"
 static XDATA sys_callback_t vib_callback_table[1] = {0};  //!< vib callback table
 static XDATA uint8_t vib_state = 0;                       //!< vib state
-static XDATA __flag_t vib_flag = 0;                       //!< vib flag
+static bit vib_flag = 0;                                  //!< vib flag
 
 /**
  * @fn vib_init
@@ -546,7 +546,7 @@ void sys_init(uint32_t clk) {
 INTERRUPT(__sys_use_timer, TF0_VECTOR) {
   static XDATA uint8_t display_index = 0;
 #ifdef USE_ADC
-  uint8_t cur = adcs.nav;
+  uint8_t cur = adc.nav;
 #define __NAV_NONE 0x7
   static XDATA uint8_t nav_last_state = __NAV_NONE, nav_cnt = 0;
   if(cur != __NAV_NONE && nav_last_state == __NAV_NONE) {
@@ -603,7 +603,7 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
 #ifdef USE_VIB
   if(P2_4 == 0) {  //__GET_VIB()) {
     if(vib_state == 0) {
-      vib_flag = EventVibStart + 1;
+      vib_flag = 1;
     }
     vib_state = 18;
   } else if(vib_state != 0) {
@@ -620,7 +620,7 @@ INTERRUPT(__sys_use_timer, TF0_VECTOR) {
  * @param callback
  * @return none
  */
-void sys_exec(sys_callback_t callback) {
+void sys_exec() {
   AUXR |= 0x90;  // T0，2工作在1T模式，且T2开始计时
   IE |= 0x80;
   // CMOD |= 0x1;
@@ -704,14 +704,11 @@ void sys_exec(sys_callback_t callback) {
 #endif
 #ifdef USE_VIB
     if(vib_flag) {
-      if(vib_callback_table[vib_flag - 1])
-        vib_callback_table[vib_flag - 1]();
       vib_flag = 0;
+      if(vib_callback_table[0])
+        vib_callback_table[0]();
     }
 #endif
-    if(callback) {
-      callback();
-    }
   }
 }
 /**
