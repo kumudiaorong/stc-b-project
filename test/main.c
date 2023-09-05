@@ -44,7 +44,7 @@ void main(void) {
   sys_register(RegUart, uart1_send_test, CONUART(DevUART1, EventUartSendOver));
   sys_register(RegUart, uart2_send_test, CONUART(DevUART2, EventUartSendOver));
   sys_register(RegUart, uart2_recv_test, CONUART(DevUART2, EventUartRecvOver));
-  sys_exec(0);
+  sys_exec();
 }
 #elif defined(TEST_DISPLAY)
 #include "display.h"
@@ -63,7 +63,7 @@ void main(void) {
   display_area(0, 8);
   uart_cfg_recv(DevUART1, buf1, 2);
   sys_register(RegUart, uart1_recv_test, CONUART(DevUART1, EventUartRecvOver));
-  sys_exec(0);
+  sys_exec();
 }
 #elif defined(TEST_TIMER)
 #include "display.h"
@@ -94,7 +94,7 @@ void main(void) {
   sys_register(RegTimer, _10ms_test, EventTimer10ms);
   sys_register(RegTimer, _100ms_test, EventTimer100ms);
   sys_register(RegTimer, _1s_test, EventTimer1S);
-  sys_exec(0);
+  sys_exec();
 }
 #elif defined(TEST_VIB_HALL_KEY_ADC)
 #include "adc.h"
@@ -201,7 +201,7 @@ void main(void) {
   sys_register(RegNav, nav_center_release_test, CONNAV(DevNavCenter, EventNavRelease));
   sys_register(RegNav, nav_key3_press_test, CONNAV(DevNavKey3, EventNavPress));
   sys_register(RegNav, nav_key3_release_test, CONNAV(DevNavKey3, EventNavRelease));
-  sys_exec(0);
+  sys_exec();
 }
 #elif defined(TEST_RTC_NVM)
 #include "display.h"
@@ -285,7 +285,7 @@ void main(void) {
   sys_register(RegTimer, _100ms_test, EventTimer100ms);
   sys_register(RegKey, key1_press_test, CONKEY(DevKey1, EventKeyPress));
   sys_register(RegKey, key2_press_test, CONKEY(DevKey2, EventKeyPress));
-  sys_exec(0);
+  sys_exec();
 }
 #elif defined(TEST_BEEP)
 // #include "adc.h"
@@ -333,7 +333,7 @@ void main(void) {
   sys_register(RegKey, key1_press_test, CONKEY(DevKey1, EventKeyPress));
   // sys_register(RegNav, nav_up_press_test, CONNAV(DevNavUp, EventNavPress));
   // sys_register(RegNav, nav_down_press_test, CONNAV(DevNavDown, EventNavPress));
-  sys_exec(0);
+  sys_exec();
 }
 #else
 #include "display.h"
@@ -482,7 +482,7 @@ void main(void) {
   sys_register(RegTimer, _1s, EventTimer1S);
   // RH();
 
-  sys_exec(0);
+  sys_exec();
 }
 
 #endif
@@ -504,7 +504,7 @@ void main(void) {
   uart_init(InitUART1);
   uart_cfg_recv(DevUART1, buf, 10);
   sys_register(RegUart, uart1_recv_test, CONUART(DevUART1, EventUartRecvOver));
-  sys_exec(0);
+  sys_exec();
 }
 #elif TEST == 2
 #include "display.h"
@@ -533,7 +533,7 @@ void main(void) {
   uart_cfg_recv(DevUART2, buf2, 5);
   sys_register(RegUart, uart1_recv_test, CONUART(DevUART1, EventUartRecvOver));
   sys_register(RegUart, uart2_recv_test, CONUART(DevUART2, EventUartRecvOver));
-  sys_exec(0);
+  sys_exec();
 }
 #elif TEST == 3
 #include "display.h"
@@ -565,7 +565,7 @@ void main(void) {
   display_init();
   sys_register(RegKey, key1_press_test, CONKEY(DevKey1, EventKeyPress));
   sys_register(RegKey, key2_press_test, CONKEY(DevKey2, EventKeyPress));
-  sys_exec(0);
+  sys_exec();
 }
 #elif TEST == 4
 #include "display.h"
@@ -579,7 +579,7 @@ void main(void) {
   v = nvm_read(0x00);
   display_led = v;
   nvm_write(0x00, v + 1);
-  sys_exec(0);
+  sys_exec();
 }
 #elif TEST == 8
 #include "adc.h"
@@ -595,6 +595,6 @@ void main(void) {
   display_init();
   adc_init();
   sys_register(RegTimer, _100ms_test, EventTimer100ms);
-  sys_exec(0);
+  sys_exec();
 }
 #endif

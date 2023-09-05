@@ -39,8 +39,8 @@ enum NavDev {
 #define CONNAV(dev, event) (dev << 1 | event)
 
 typedef struct {
-  uint8_t rt;
-  uint8_t rop;
+  int8_t rt;
+  uint16_t rop;
   uint8_t nav;
 } adc_t;
 extern XDATA adc_t adc;
