@@ -16,7 +16,7 @@ void PinIntEvent() {
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
   // Serial1.begin(9600);
 #if 1 == EXT_ISR_MODE
   // Pin: T0(GPIO4), 函数指针:TouchEvent, 阈值: 40
