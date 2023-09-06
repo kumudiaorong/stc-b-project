@@ -1,7 +1,7 @@
 #ifndef __UART_H__
 #define __UART_H__
 #include "def.h"
-#define __UART_DEFAULT_BAUDRATE 9600
+#define __UART_DEFAULT_BAUDRATE 115200
 
 enum UartInit { InitUART1 = 1, InitUART2_Ext = 2, InitUART2_485 = 6 };
 enum UartDev { DevUART1 = 0, DevUART2 = 1 };
