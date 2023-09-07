@@ -1,39 +1,50 @@
 #include <Arduino.h>
+#include <HTTPClient.h>
+#include <WiFi.h>
 
-// 定义外部中断的Mode
-// 0: 无中断，读取Touch值
-// 1：Touch中断，执行 TouchEvent()
-// 2: 外部IO的中断
-#define EXT_ISR_MODE 1
-
-void TouchEvent() {
-  Serial.printf("Touch Event.\r\n");
+void wifi_connect() {
+  WiFi.begin("km", "12345678");
+  uint8_t cnt = 0;
+  while(WiFi.status() != WL_CONNECTED && cnt++ < 10) {
+    delay(300);
+  }
 }
 
-void PinIntEvent() {
-  Serial.printf("PinInt Event.\r\n");
-}
+String uri = "http://47.115.204.164:8080/put?";
 
+uint8_t buf[4];
+char tmpbuf[10] = {};
+void put() {
+  Serial.println("put");
+  HTTPClient http;
+  uint8_t cnt = sprintf(tmpbuf, "%03u%02d%d%d", *(uint16_t *)buf, buf[2], buf[3] & 0x1, (buf[3] >> 1) & 0x1);
+  if(cnt > 0) {
+    http.begin(uri+ String(tmpbuf, cnt));  // HTTP begin
+    Serial.println(uri + String(tmpbuf, cnt));
+    int httpCode = http.GET();
+  }
+  http.end();
+}
+uint8_t s2flag = 0;
+void s2recv(void) {
+  while(Serial2.available() < 4)
+    ;
+  Serial2.readBytes(buf, 4);
+  s2flag = 1;
+  Serial.printf("%02x%02x%02x%02x\n", buf[0], buf[1], buf[2], buf[3]);
+}
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  // Serial1.begin(9600);
-#if 1 == EXT_ISR_MODE
-  // Pin: T0(GPIO4), 函数指针:TouchEvent, 阈值: 40
-  // touchAttachInterrupt(T0, TouchEvent, 40);
-#elif 2 == EXT_ISR_MODE
-  pinMode(0, INPUT_PULLUP);
-  attachInterrupt(0, PinIntEvent, FALLING);
-
-#endif
+  Serial.begin(115200);  // open the serial port at 115200 bps;
+  wifi_connect();
+  Serial2.begin(115200);
+  Serial2.onReceive(s2recv);
+  Serial.println("start");
 }
-
 void loop() {
-  // put your main code here, to run repeatedly:
-
-#if 0 == EXT_ISR_MODE
-    Serial.printf("touch:%d\r\n", touchRead(T0));
-#endif
-  Serial.print(0x11);
-  delay(2000);
+  if(s2flag) {
+    put();
+    s2flag = 0;
+  }
+  delay(1000);
+  Serial2.print('1');
 }
