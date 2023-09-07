@@ -12,7 +12,6 @@ void wifi_connect() {
 
 String uri = "http://47.115.204.164:8080/put?";
 
-//	获取粉丝数
 uint8_t buf[4];
 char tmpbuf[10] = {};
 void put() {
@@ -23,12 +22,6 @@ void put() {
     http.begin(uri+ String(tmpbuf, cnt));  // HTTP begin
     Serial.println(uri + String(tmpbuf, cnt));
     int httpCode = http.GET();
-    if(httpCode > 0) {
-      if(httpCode == HTTP_CODE_OK)  // 收到正确的内容
-      {
-      }
-    } else {
-    }
   }
   http.end();
 }
@@ -38,6 +31,7 @@ void s2recv(void) {
     ;
   Serial2.readBytes(buf, 4);
   s2flag = 1;
+  Serial.printf("%02x%02x%02x%02x\n", buf[0], buf[1], buf[2], buf[3]);
 }
 void setup() {
   Serial.begin(115200);  // open the serial port at 115200 bps;
@@ -46,7 +40,6 @@ void setup() {
   Serial2.onReceive(s2recv);
   Serial.println("start");
 }
-uint8_t sbuf[4];
 void loop() {
   if(s2flag) {
     put();
