@@ -43,7 +43,7 @@ typedef short int int16_t;
 typedef unsigned long int uint32_t;
 typedef long int32_t;
 
-
+SFR(IAP_CONTR, 0xC7);  // 0000,0000 IAP¿ØÖÆ¼Ä´æÆ÷
 
 SFR(P1, 0x90);
 SBIT(P1_0, 0x90, 0);

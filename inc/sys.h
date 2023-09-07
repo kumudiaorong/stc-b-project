@@ -8,4 +8,5 @@ enum TimerEvent { EventTimer10ms, EventTimer100ms, EventTimer1S };
 void sys_init(uint32_t sysclk);
 void sys_register(uint8_t reg, sys_callback_t callback, uint32_t cfg);
 void sys_exec();
+void sys_reset();
 #endif

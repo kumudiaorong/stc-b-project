@@ -711,6 +711,9 @@ void sys_exec() {
 #endif
   }
 }
+void sys_reset(void) {
+  IAP_CONTR|=0x20;
+}
 /**
  * @fn sys_register
  * @brief register sensor
